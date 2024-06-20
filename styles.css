@@ -1,0 +1,221 @@
+/* Reset default styles */
+body, h1, h2, p, input {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Set background color */
+body {
+    background-color: #f5f5f5;
+ /* background-image: linear-gradient(to top, #000000 0%, #5f0000 100%); */
+    font-family: 'Poppins', sans-serif;
+    padding: 0px;
+    padding-top: 20px;
+}
+
+/* Container to wrap header and main content */
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    background-color: #fff;
+}
+
+/* Style the header */
+header {
+    text-align: center;
+    padding: 20px;
+    background-color: #fff;
+}
+
+/* Align header content */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: nowrap; /* Changed to nowrap to keep items in a line on larger screens */
+}
+
+.hero .image-container {
+    width: 200px;
+    height: auto;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+}
+
+.hero-text {
+    max-width: 400px;
+    text-align: left;
+    font-weight: 400; /* Regular font weight */
+}
+
+.hero-text h2 {
+    font-weight: 700; /* Bold font weight */
+}
+
+/* Style the main content */
+main {
+    padding: 5px;
+    background-color: #fff;
+}
+
+/* Style the intro section */
+.intro {
+    text-align: center;
+    padding: 5px 0;
+}
+
+.intro h1 {
+    font-size: 36px;
+    margin-bottom: 5px;
+    font-weight: 800; /* Extra bold font weight */
+}
+
+.intro p {
+    text-align: left;
+    margin-left: 20px;
+    margin-right: 20px;
+    font-weight: 400; /* Regular font weight */
+}
+
+.intro hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 20px 0;
+}
+
+/* Style the content section */
+section {
+    padding: 20px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.line {
+    width: 100%;
+    border: none;
+    border-top: 1.5px solid #ccc;
+    margin: 20px 0;
+}
+
+.subscribe form {
+    width: 100%;
+    max-width: 350px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style the form inputs */
+form input[type="email"], form input[type="text"] {
+    display: block;
+    width: 100%;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+form input[type="email"]:focus, form input[type="text"]:focus {
+    border-color: #AF0000;
+    outline: none; /* Remove default outline */
+}
+
+/* Style the form submit button */
+form button[type="submit"] {
+    background-color: #af0000;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700; /* Bold font weight */
+    width: 100%;
+}
+
+form button[type="submit"]:hover {
+    background-color: #6e0000;
+}
+
+/* Style the footer */
+footer {
+    background-color: #fff;
+    color: #333;
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid #ccc;
+    border-radius: 0 0 20px 20px;
+}
+
+/* Additional styles */
+h1 {
+    font-size: 36px;
+    font-weight: 800; /* Extra bold font weight */
+    color: #000000;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #666;
+    font-weight: 400; /* Regular font weight */
+}
+
+/* Image manipulation */
+.image-container {
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    width: 200px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 0% 10%;
+}
+
+/* Highlighted text */
+.highlight {
+    color: #AF0000;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 770px) {
+    .hero {
+        flex-direction: column; /* Change to column layout on smaller screens */
+    }
+    
+    .hero .image-container {
+        width: 200px; /* Adjust image size for smaller screens */
+    }
+    
+    .hero-text {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .intro p {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}
