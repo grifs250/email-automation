@@ -1,0 +1,20 @@
+{
+  "name": "email-automation",
+  "version": "1.0.0",
+  "description": "Gets emails from users and send them email. The emails are saved in at database",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.4"
+  },
+  "devDependencies": {
+      "nodemon": "^3.1.4"
+  }
+}
