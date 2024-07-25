@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head.ejs') %>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="image-container">
+        <img src="statics/physique.png" alt="Header Image">
+      </div>
+    </header>
+    <main>
+      <div class="content">
+        <section class="intro">
+          <h1>Izmanto šo <span class="highlight">Treniņprogrammu</span>, lai kļūtu par cilvēku ko <span class="highlight">respektē</span>.</h1>
+          <p>Ievadi savu Vārdu, Ē-pastu, un es uzreiz Tev aizsūtīšu ē-pastā linku uz Treniņprogrammu.</p>
+          <p>Tu tiksiet iekļauts manā ēpastu sarakstā, kur kad man atnāks iedvesmai atsūtīšu Tev ko noderīgu.</p>
+        </section>
+        <section class="subscribe">
+          <hr class="line">
+          <h2>Abonē Tagad!</h2>
+          <form action="/subscribe" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email address">
+            <button type="submit">Vēlos Treniņprogrammu</button>
+          </form>
+        </section>
+      </div>
+      <%- include('./partials/footer.ejs') %>
+    </main>
+  </div>
+</body>
+</html>
