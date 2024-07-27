@@ -1,34 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lv">
 <%- include('./partials/head.ejs') %>
 <body>
   <div class="container">
     <header class="header">
       <div class="image-container">
-        <img src="statics/physique.png" alt="Header Image">
+        <img src="/images/physique.png" alt="Header Image">
       </div>
     </header>
     <main>
       <div class="content">
         <section class="intro">
-          <h1>Izmanto šo <span class="highlight">Treniņprogrammu</span>, lai kļūtu par cilvēku ko <span class="highlight">respektē</span>.</h1>
-          <p>Ievadi savu Vārdu, Ē-pastu, un es uzreiz Tev aizsūtīšu ē-pastā linku uz Treniņprogrammu.</p>
-          <p>Tu tiksiet iekļauts manā ēpastu sarakstā, kur kad man atnāks iedvesmai atsūtīšu Tev ko noderīgu.</p>
+          <h1>Pacelies jaunā <span class="highlight">LĪMENĪ</span>!</h1>
+          <h1>Kļūsti par cilvēku kuru citi <span class="highlight">respektē</span>.</h1>
         </section>
         <section class="subscribe">
           <hr class="line">
-          <h2>Abonē Tagad!</h2>
+          <h2>Tava jaunā treniņprogramma - atslēga uz <span class="highlight">panākumiem</span>.</h2>
           <form action="/tnx" method="POST">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" placeholder="Enter your name">
-            <label for="email">Email Address:</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email address">
-            <button type="submit">Vēlos Treniņprogrammu</button>
+            <label for="name">Vārds:</label>
+            <input type="text" id="name" name="name" placeholder="Ievadi savu vārdu" required>
+            
+            <label for="email">E-pasta adrese:</label>
+            <input type="email" id="email" name="email" placeholder="Ievadi savu e-pastu" required>
+            
+            <button type="submit">Saņemt tagad</button>
+
+            <div class="info-icon-container">
+              <span class="info-icon"><i class="fas fa-info-circle"></i></span>
+              <span id="tooltip" class="tooltip-text">
+                <p>Ievadi savu Vārdu, E-pastu, un es uzreiz Tev aizsūtīšu ē-pastā linku uz Treniņprogrammu.</p>
+                <p>Tu tiksiet iekļauts manā ēpastu sarakstā, kur kad man atnāks iedvesmai atsūtīšu Tev ko noderīgu.</p>
+              </span>
+            </div>
+
           </form>
         </section>
       </div>
       <%- include('./partials/footer.ejs') %>
     </main>
   </div>
+  <script src="/js/main.js"></script>
 </body>
 </html>

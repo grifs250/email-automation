@@ -10,7 +10,5 @@ router.get('/tnx', appController.tnx_get);
 
 router.post('/tnx', appController.tnx_post);
 
-router.get('/mail', appController.mail_get);
-
 
 module.exports = router;

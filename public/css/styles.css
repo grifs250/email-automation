@@ -1,0 +1,367 @@
+/* RESET DEFAULT STYLES */
+body, h1, h2, p, input {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif; /* Ensure consistent font across elements */
+}
+
+/* GLOBAL STYLES */
+body {
+    background-color: #f5f5f5;
+    background-image: url("/images/background.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    min-height: 100vh; /* Ensures the body covers the full height */
+}
+
+/* MAIN CONTAINER STYLES */
+.container, .container-tnx {
+    display: flex;
+    flex-direction: row-reverse;
+    max-width: 100%;
+    margin: 60px 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    background-color: #fff;
+    height: 800px; /* Fixed height */
+    width: 800px; /* Fixed width */
+}
+
+.container-tnx {
+    flex-direction: column; /* Different layout for tnx page */
+    height: 820px; /* Different height for tnx page */
+}
+
+/* HEADER STYLES */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    flex: 0 0 50%; /* Header takes 40% of container width */
+    height: 100%; /* Full height */
+}
+
+/* IMAGE CONTAINER STYLES */
+.image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensure the image covers the container */
+    object-position: center; /* Center the image */
+}
+
+/* MAIN CONTENT STYLES */
+main {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #fff;
+    overflow-y: auto; /* Scroll if content overflows */
+    flex: 1; /* Take remaining space */
+}
+
+/* INTRO SECTION */
+.intro {
+    text-align: center;
+    padding: 5px 0;
+}
+
+.intro h1 {
+    font-size: 32px;
+    margin-bottom: 5px;
+    font-weight: 800;
+}
+
+.intro p {
+    font-size: 16px;
+    margin: 0 20px;
+    font-weight: 400;
+}
+
+/* HORIZONTAL LINE */
+hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 20px 0;
+}
+
+/* CONTENT WRAPPER */
+.content {
+    flex: 1; /* Grow and take available space */
+}
+
+/* FOOTER */
+footer {
+    background-color: #fff;
+    color: #333;
+    padding: 8px;
+    text-align: center;
+    border-top: 1px solid #ccc;
+    border-radius: 0 0 20px 20px;
+}
+
+/* GENERAL TYPOGRAPHY */
+h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #000;
+}
+
+h2 {
+    text-align: center;
+}
+
+p {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #666;
+    font-weight: 400;
+}
+
+/* HIGHLIGHTED TEXT */
+.highlight {
+    color: #AF0000;
+}
+
+/* SUBSCRIBE FORM */
+.subscribe form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    max-width: 300px;
+    margin: 30px auto;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* FORM INPUTS */
+form input[type="email"], form input[type="text"] {
+    display: block;
+    width: 100%;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+form input[type="email"]:focus, form input[type="text"]:focus {
+    border-color: #AF0000;
+    outline: none;
+}
+
+/* SUBMIT BUTTON */
+form button[type="submit"] {
+    background-color: #af0000;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    width: 100%;
+}
+
+form button[type="submit"]:hover {
+    background-color: #6e0000;
+}
+
+/* SOCIALS SECTION */
+section.socials {
+    text-align: center;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    max-width: 270px;
+}
+
+section.socials h2 {
+    font-size: 24px;
+    margin-bottom: 7px;
+    color: #333;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.social-icons a {
+    text-decoration: none;
+    color: #333;
+    font-size: 35px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icons a:hover {
+    color: #007BFF; /* Hover color for all icons */
+    transform: scale(1.1);
+}
+
+.social-icons .fa-instagram {
+    color: transparent;
+    background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5); /* Instagram gradient */
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.social-icons .fa-youtube {
+    color: #FF0000;
+}
+
+.social-icons .fa-google {
+    color: #4285F4;
+}
+
+.social-icons .fa-discord {
+    color: #7289DA;
+}
+
+/* INFO ICON AND TOOLTIP */
+.info-icon-container {
+    position: absolute;
+    top: 6px; /* Adjust position */
+    right: 6px; /* Adjust position */
+    z-index: 10;
+}
+
+.info-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #af0000;
+    transition: transform 0.3s ease;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    background-color: #f9f9f9;
+    color: #000;
+    text-align: left;
+    border-radius: 20px;
+    padding: 15px;
+    position: absolute;
+    z-index: 1;
+    width: 250px;
+    bottom: 37px; /* Position above the icon */
+    right: -8px; /* Align with icon */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.info-icon-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.info-icon-container:hover .info-icon {
+    transform: scale(1.2);
+}
+
+/* ERROR PAGE STYLES */
+.container-error {
+    height: 400px; /* Fixed height */
+    width: 400px; /* Fixed width */
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center; /* Center the button horizontally */
+    align-items: center; /* Center the button vertically */
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    margin: 20px auto;
+}
+
+a.btn {
+    display: inline-block;
+    padding: 12px 24px; /* Padding for size */
+    border-radius: 25px; /* Rounded corners */
+    background-image: linear-gradient(45deg, #6a11cb, #2575fc); /* Gradient background */
+    color: white; /* Text color */
+    font-size: 16px; /* Font size */
+    font-weight: bold; /* Font weight */
+    text-align: center; /* Center text */
+    text-decoration: none; /* No underline */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition effects */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+a.btn:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Increased shadow on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
+}
+
+a.btn:active {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Reduced shadow on click */
+    transform: translateY(1px); /* Pressed effect */
+}
+
+
+/* RESPONSIVE STYLES */
+@media (max-width: 800px) {
+    .container {
+        flex-direction: column;
+        height: auto; /* Auto height for column layout */
+    }
+
+    .header {
+        flex: 0 0 auto;
+        height: auto;
+    }
+
+    .intro p {
+        margin: 0 10px;
+    }
+
+    .tooltip-text {
+        width: 200px;
+        font-size: 14px;
+    }
+
+    .subscribe form {
+        padding: 15px;
+        max-width: 400px;
+    }
+}
+
+@media (max-width: 600px) {
+    .social-icons {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .social-icons a {
+        font-size: 60px;
+    }
+}

@@ -1,7 +1,8 @@
 const express = require('express');
 const morgan =require('morgan');
-const mongoose = require('mongoose')
-const appRoute = require('./routes/route.js')
+const mongoose = require('mongoose');
+const helmet = require('helmet');
+const appRoute = require('./routes/route.js');
 require('dotenv').config();
 
 //express app
@@ -19,10 +20,15 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use(express());
+app.use(helmet()); 
 
 // routes
 app.use(appRoute)
+
+// 404 Page
+app.use((req, res) => {
+    res.status(404).render('index', { title: '404' });
+});
 
 app.use((req, res) => {
     res.render('index', { title: '404' })

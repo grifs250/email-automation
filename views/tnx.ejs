@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <%- include('./partials/head.ejs') %>
-</head>
-
+<html lang="lv">
+<%- include('./partials/head.ejs') %>
 <body>
-  <div class="container-tenx">
-    <header class="header">
+  <div class="container-tnx">
+    <header class="header header-tnx">
       <div class="image-container">
-        <img class="banner" src="statics/banner.png" alt="Header Image">
+        <img class="banner" src="/images/banner.png" alt="Header Image">
       </div>
     </header>
     <main>
       <div class="content">
-      <section class="intro">
-        <h1>Tiko Tev nosūtiju <span class="highlight">Treniņprogrammu</span> ē-pastā. Ej un izšaujies cauri atmosfērai!</h1>
-        <p>Pārbaudi arī SPAM vēstules!</p>
+        <section class="intro">
+          <h1>Tiko Tev nosūtiju <span class="highlight">Treniņprogrammu</span> e-pastā. Ej un izšaujies cauri atmosfērai!</h1>
+          <p>Pārbaudi arī SPAM vēstules!</p>
+        </section>
         <hr class="line">
-        <h2>Mani sociālie:</h2>
-        <div class="buttons">
-          <a href="https://www.instagram.com/mikelis_silins/" class="fa fa-instagram"></a>
-          <a href="https://www.youtube.com/@mikelis_silins" class="fa fa-youtube"></a>
-          <a href="mailto:mikelissilins25@gmail.com" class="fa fa-google"></a>
-        </div>
+        <section class="socials">
+          <h2>Mani sociālie:</h2>
+          <div class="social-icons">
+            <a href="https://www.youtube.com/@mikelis_silins" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://discord.gg/3QfjkETaSk" target="_blank"><i class="fab fa-discord"></i></a>
+            <a href="https://www.instagram.com/mikelis_silins/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="mailto:mikelissilins25@gmail.com" target="_blank"><i class="fab fa-google"></i></a>
+          </div>
+        </section>
       </div>
       <%- include('./partials/footer.ejs') %>
     </main>
