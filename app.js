@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path'); // Added path for setting views directory
 const appRoute = require('./routes/route.js');
 require('dotenv').config();
 
@@ -16,6 +17,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Register view engine
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')); // Ensure views directory is correctly set
 
 // Middleware
 app.use(express.static('public'));
@@ -23,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '10kb' })); // Limit request body to 10KB
 app.use(morgan('dev'));
 app.use(helmet());
+app.set('trust proxy', true); // Enable trust proxy
 
 // Rate limiting middleware
 const limiter = rateLimit({

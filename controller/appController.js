@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const { validationResult } = require('express-validator');
 const Email = require('../models/email');
 const fs = require('fs');
+const path = require('path'); // Added path for reading email template
 require('dotenv').config();
 
 // Route Handlers
@@ -42,7 +43,7 @@ const tnx_post = async (req, res) => {
         });
 
         // Load email template and replace variables
-        const htmlContent = fs.readFileSync('./views/mail.ejs', 'utf-8');
+        const htmlContent = fs.readFileSync(path.join(__dirname, '../views/mail.ejs'), 'utf-8'); // Corrected file path
         const personalizedHtmlContent = htmlContent.replace('{{name}}', user.name);
 
         const message = {
