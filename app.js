@@ -43,7 +43,7 @@ app.use(appRoute);
 
 // 404 Page
 app.use((req, res) => {
-    res.status(404).render('index', { title: '404' });
+    res.status(404).render('index', { title: '404', errors: []});
 });
 
 // Listen for requests
