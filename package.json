@@ -4,7 +4,8 @@
   "description": "Gets emails from users and send them email. The emails are saved in at database",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
