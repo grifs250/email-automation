@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const path = require('path'); // Added path for setting views directory
+const path = require('path'); // Added path for static files
 const appRoute = require('./routes/route.js');
 require('dotenv').config();
 
@@ -20,7 +20,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); // Ensure views directory is correctly set
 
 // Middleware
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public'))); // Correctly set static files directory
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '10kb' })); // Limit request body to 10KB
 app.use(morgan('dev'));
