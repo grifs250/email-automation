@@ -1,22 +1,28 @@
 const nodemailer = require('nodemailer');
+const { validationResult } = require('express-validator');
 const Email = require('../models/email');
 const fs = require('fs');
 require('dotenv').config();
 
 // Route Handlers
 const index_get = (req, res) => {
-    res.render('index', { title: 'Treniņprogramma' });
+    res.render('index', { title: 'Treniņprogramma', errors: [] });
 };
 
 const tnx_get = (req, res) => {
     res.render('tnx', { title: 'Paldies' });
 };
 
-const mail_get = (req, res) => {
-    res.render('mail', { name: 'Name' });
-};
-
 const tnx_post = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).render('index', {
+            title: 'Treniņprogramma',
+            errors: errors.array(),
+            oldInput: req.body
+        });
+    }
+
     try {
         // Create and save user email data
         const user = new Email(req.body);
@@ -61,5 +67,4 @@ module.exports = {
     index_get,
     tnx_get,
     tnx_post,
-    mail_get,
 };

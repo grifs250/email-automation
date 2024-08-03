@@ -327,7 +327,6 @@ a.btn:active {
     transform: translateY(1px); /* Pressed effect */
 }
 
-
 /* RESPONSIVE STYLES */
 @media (max-width: 800px) {
     .container {

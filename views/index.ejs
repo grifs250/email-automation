@@ -19,18 +19,26 @@
           <h2>Tava jaunā treniņprogramma - atslēga uz <span class="highlight">panākumiem</span>.</h2>
           <form action="/tnx" method="POST">
             <label for="name">Vārds:</label>
-            <input type="text" id="name" name="name" placeholder="Ievadi savu vārdu" required>
+            <input type="text" id="name" name="name" placeholder="Ievadi savu vārdu" value="<%= typeof oldInput !== 'undefined' ? oldInput.name : '' %>" required>
             
             <label for="email">E-pasta adrese:</label>
-            <input type="email" id="email" name="email" placeholder="Ievadi savu e-pastu" required>
+            <input type="email" id="email" name="email" placeholder="Ievadi savu e-pastu" value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>" required>
             
             <button type="submit">Saņemt tagad</button>
+
+            <% if (errors && errors.length > 0) { %>
+                <div class="errors">
+                    <% errors.forEach(function(error) { %>
+                        <p><%= error.msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
 
             <div class="info-icon-container">
               <span class="info-icon"><i class="fas fa-info-circle"></i></span>
               <span id="tooltip" class="tooltip-text">
                 <p>Ievadi savu Vārdu, E-pastu, un es uzreiz Tev aizsūtīšu ē-pastā linku uz Treniņprogrammu.</p>
-                <p>Tu tiksiet iekļauts manā ēpastu sarakstā, kur kad man atnāks iedvesmai atsūtīšu Tev ko noderīgu.</p>
+                <p>Tu tiksi iekļauts manā ēpastu sarakstā, kur, kad man atnāks iedvesma, atsūtīšu tev ko noderīgu.</p>
               </span>
             </div>
 
