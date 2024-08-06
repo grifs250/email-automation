@@ -60,7 +60,7 @@ User data is securely stored in a MongoDB database. The Mongoose schema defined 
 
 ### Email Confirmation
 
-A confirmation email is sent to the user upon successful registration. This email confirms that their details have been received and provides additional information about the training program. Nodemailer is used to send these emails, ensuring reliable and efficient email delivery.
+A confirmation email is sent to the user upon successful registration. This email confirms that their details have been received, it provides link to the training program and additional information about it. Nodemailer is used to send these emails, ensuring reliable and efficient email delivery.
 
 ### Rate Limiting
 
@@ -103,6 +103,14 @@ Helmet helps secure Express applications by setting various HTTP headers. It hel
 ### Morgan
 
 Morgan is an HTTP request logger middleware for Node.js. It is used to log requests to the application, helping with debugging and monitoring.
+
+## Sources of Inspiration and Thanks
+
+This project was made possible thanks to the help and inspiration from several sources:
+
+- **CS50**: First and foremost, a huge thank to CS50 for the knowledge, motivation, and guidance to start and finish this project. The insights and inspiration from past project submitters and the entire CS50 community were invaluable.
+- **ChatGPT**: A special thanks to ChatGPT for assisting with precise writing, comments, and syntax throughout the development process.
+- **YouTube Tutorial Creators**: Of course, a heartfelt thanks to everyone who creates and shares free tutorials on Node.js, MongoDB, Nodemailer, and other technologies. Your contributions are an essential resource for the developer community.
 
 ## Conclusion
 
