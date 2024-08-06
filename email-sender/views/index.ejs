@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head.ejs') %>
+</head>
+<body>
+  <div class="container">
+    <main>
+      <div class="content">
+        <section class="intro">
+          <h1>Send Bulk Emails</h1>
+          <form action="/emails/send" method="POST">
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject" placeholder="Enter subject" value="<%= typeof oldInput !== 'undefined' ? oldInput.subject : '' %>" required>
+            
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="10" placeholder="Enter message" required><%= typeof oldInput !== 'undefined' ? oldInput.message : '' %></textarea>
+            
+            <button type="submit">Send Emails</button>
+
+            <% if (errors && errors.length > 0) { %>
+                <div class="errors">
+                    <% errors.forEach(function(error) { %>
+                        <p><%= error.msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+          </form>
+        </section>
+      </div>
+      <%- include('./partials/footer.ejs') %>
+    </main>
+  </div>
+</body>
+</html>

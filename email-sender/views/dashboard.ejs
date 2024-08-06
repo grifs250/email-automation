@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head.ejs') %>
+</head>
+<body>
+  <div class="container">
+    <main>
+      <div class="content">
+        <section class="intro">
+          <h1>Dashboard</h1>
+          <p>Total Emails: <%= emails.length %></p>
+          <p>Sent Emails: <%= sentEmails %></p>
+          <p>Failed Emails: <%= failedEmails %></p>
+
+          <% if (failedEmailList && failedEmailList.length > 0) { %>
+            <h2>Failed Emails:</h2>
+            <ul>
+              <% failedEmailList.forEach(function(email) { %>
+                <li><%= email %></li>
+              <% }); %>
+            </ul>
+          <% } %>
+
+          <h2>Email List:</h2>
+          <ul>
+            <% emails.forEach(function(email) { %>
+              <li><%= email.name %> - <%= email.email %></li>
+            <% }); %>
+          </ul>
+        </section>
+      </div>
+      <%- include('./partials/footer.ejs') %>
+    </main>
+  </div>
+</body>
+</html>
