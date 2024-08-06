@@ -11,11 +11,11 @@ router.post('/tnx', [
     // Validate and sanitize inputs "provides additional security"
     body('name')
         .trim()
-        .isLength({ min: 2 }).withMessage('Name must be at least 2 characters long')
-        .isLength({ max: 100 }).withMessage('Name must be at most 100 characters long')
+        .isLength({ min: 2 }).withMessage('Vārdam ir jābūt vismaz 2 rakstzīmju garumā')
+        .isLength({ max: 100 }).withMessage('Vārds nedrīkst būt garāks par 100 rakstzīmēm')
         .escape(),
     body('email')
-        .isEmail().withMessage('Please enter a valid email address')
+        .isEmail().withMessage('Lūdzu ievadiet derīgu e-pasta adresi')
         .normalizeEmail(),
 ], appController.tnx_post);
 
