@@ -5,14 +5,13 @@ const { validationResult } = require('express-validator');
 require('dotenv').config();
 
 const Email = require('../models/email');
-const Contact = require('../models/contact');
+// const Contact = require('../models/contact');
 
 const index_get = (req, res) => {
     res.render('index', { title: 'Send Emails', errors: [] });
 };
 
 const dashboard_get = async (req, res) => {
-    const emails = await Email.find({});
     res.render('dashboard', { title: 'Dashboard', emails });
 };
 
@@ -27,21 +26,18 @@ const send_emails_post = async (req, res) => {
     }
 
     try {
-        // Fetch selected contacts
-        const selectedContacts = req.body.contacts; // Assume this is an array of contact IDs from the form
-        const emails = await Contact.find({ _id: { $in: selectedContacts } });
-        console.log(emails)
-        // [
-        //     {
-        //         name: "mikelis",
-        //         email: "asdf@asdf.sdf"
-        //     },
-        //     {
-        //     name: "Miķelis",
-        //     email: "mikelisindex@gmail.com"
-        //     }
+        // sets the email list
+        const emails = [
+            {
+                name: "mikelis",
+                email: "asdf@asdf.sdf"
+            },
+            {
+                name: "Miķelis",
+                email: "mikelisindex@gmail.com"
+            }
 
-        // ]
+        ];
         const EMAIL = process.env.EMAIL;
         const PASS = process.env.APP_PASS;
 

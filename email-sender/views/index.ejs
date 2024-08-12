@@ -9,30 +9,6 @@
       <div class="content">
         <section class="intro">
           <h1>Send Bulk Emails</h1>
-          <form action="/send-email" method="POST">
-            <label for="contacts">Choose Contacts:</label>
-            <select name="contacts" id="contacts" multiple required>
-                <% emails.forEach(email => { %>
-                    <option value="<%= email._id %>"><%= email.name %> - <%= email.email %></option>
-                <% }); %>
-            </select>
-
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" name="subject" required>
-
-            <label for="message">Message:</label>
-            <textarea id="message" name="message" rows="10" required></textarea>
-
-            <button type="submit">Send Email</button>
-
-            <% if (errors && errors.length > 0) { %>
-                <div class="errors">
-                    <% errors.forEach(function(error) { %>
-                        <p><%= error.msg %></p>
-                    <% }); %>
-                </div>
-            <% } %>
-          </form>
           <form action="/send" method="POST">
             <label for="subject">Subject:</label>
             <input type="text" id="subject" name="subject" placeholder="Enter subject" value="<%= typeof oldInput !== 'undefined' ? oldInput.subject : '' %>" required>

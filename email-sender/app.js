@@ -7,7 +7,7 @@ const path = require('path');
 require('dotenv').config();
 
 const emailRoutes = require('./routes/emailRoutes');
-const contactRoutes = require('./routes/contactRoutes');
+// const contactRoutes = require('./routes/contactRoutes');
 
 // Express app
 const app = express();
@@ -41,7 +41,7 @@ app.use(limiter);
 
 // Routes
 app.use(emailRoutes);
-app.use(contactRoutes);
+// app.use(contactRoutes);
 
 // 404 Page
 app.use((req, res) => {
