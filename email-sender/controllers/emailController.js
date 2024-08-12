@@ -1,9 +1,11 @@
 const nodemailer = require('nodemailer');
-const Email = require('../models/email');
 const fs = require('fs');
 const path = require('path');
 const { validationResult } = require('express-validator');
 require('dotenv').config();
+
+const Email = require('../models/email');
+const Contact = require('../models/contact');
 
 const index_get = (req, res) => {
     res.render('index', { title: 'Send Emails', errors: [] });
@@ -25,7 +27,21 @@ const send_emails_post = async (req, res) => {
     }
 
     try {
-        const emails = await Email.find({});
+        // Fetch selected contacts
+        const selectedContacts = req.body.contacts; // Assume this is an array of contact IDs from the form
+        const emails = await Contact.find({ _id: { $in: selectedContacts } });
+        console.log(emails)
+        // [
+        //     {
+        //         name: "mikelis",
+        //         email: "asdf@asdf.sdf"
+        //     },
+        //     {
+        //     name: "Miķelis",
+        //     email: "mikelisindex@gmail.com"
+        //     }
+
+        // ]
         const EMAIL = process.env.EMAIL;
         const PASS = process.env.APP_PASS;
 
@@ -37,28 +53,31 @@ const send_emails_post = async (req, res) => {
             },
         });
 
-        const htmlContent = fs.readFileSync(path.join(__dirname, '../views/emailTemplate.ejs'), 'utf-8');
+        const htmlContent = fs.readFileSync(path.join(__dirname, '../views/emailTemplete.html'), 'utf-8');
         let sentEmails = 0;
         let failedEmails = 0;
         const failedEmailList = [];
 
-        for (const emailData of emails) {
-            const personalizedHtmlContent = htmlContent.replace('{{name}}', emailData.name);
-            const message = {
-                from: EMAIL,
-                to: emailData.email,
-                subject: 'Your Training Program',
-                html: personalizedHtmlContent,
-            };
 
-            try {
-                await transporter.sendMail(message);
-                sentEmails++;
-            } catch (error) {
-                failedEmails++;
-                failedEmailList.push(emailData.email);
-            }
-        }
+        // for (const emailData of emails) {
+        //     console.log(emailData.email)
+        //     const personalizedHtmlContent = htmlContent.replace('{{name}}', emailData.name);
+        //     const message = {
+        //         from: EMAIL,
+        //         to: emailData.email,
+        //         subject: 'Your Training Program',
+        //         html: personalizedHtmlContent,
+        //     };
+        //     console.log(message);
+
+        //     try {
+        //         await transporter.sendMail(message);
+        //         sentEmails++;
+        //     } catch (error) {
+        //         failedEmails++;
+        //         failedEmailList.push(emailData.email);
+        //     }
+        // }
 
         res.render('dashboard', {
             title: 'Dashboard',
@@ -69,7 +88,7 @@ const send_emails_post = async (req, res) => {
         });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).render('error', { title: 'Error' });
+        res.status(500).render('error', { title: 'Error', error: `Server Error: ${error}` });
     }
 };
 

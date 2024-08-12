@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head') %>
+    <title>Add New Contact</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Contact</h1>
+        <form action="/contacts" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="<%= typeof oldInput.name !== 'undefined' ? oldInput.name : '' %>" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="<%= typeof oldInput.email !== 'undefined' ? oldInput.email : '' %>" required>
+
+            <button type="submit">Add Contact</button>
+
+            <% if (errors && errors.length > 0) { %>
+                <div class="errors">
+                    <% errors.forEach(function(error) { %>
+                        <p><%= error.msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+        </form>
+    <%- include('./partials/footer.ejs') %>
+    </div>
+</body>
+</html>

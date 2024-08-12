@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="lv">
+<%- include('./partials/head.ejs') %>
+<body>
+  <div class="container container-error">
+    <main>
+      <div class="content">
+        <section class="intro">
+          <h1>Somthing went wrong.</h1>
+          <div class="errors">
+            <p><%= error %></p>
+          </div>
+          <a href="/">
+            <button>To start page</button>
+          </a>
+        </section>
+      </div>
+      <%- include('./partials/footer.ejs') %>
+    </main>
+  </div>
+</body>
+</html>

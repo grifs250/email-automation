@@ -4,8 +4,10 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const emailRoutes = require('./routes/emailRoutes');
 require('dotenv').config();
+
+const emailRoutes = require('./routes/emailRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 
 // Express app
 const app = express();
@@ -23,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(helmet());
-app.set('trust proxy', true);
+// app.set('trust proxy', true);
 
 // Rate limiting middleware
 const limiter = rateLimit({
@@ -38,7 +40,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Routes
-app.use('/emails', emailRoutes);
+app.use(emailRoutes);
+app.use(contactRoutes);
 
 // 404 Page
 app.use((req, res) => {
