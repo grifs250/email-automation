@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const record = new mongoose.Schema({
+const recordSchema = new mongoose.Schema({
     subject: { type: String, required: true },
     message: { type: String, required: true },
     sentAt: { type: Date, default: Date.now },
@@ -10,4 +10,4 @@ const record = new mongoose.Schema({
     failedEmailList: [{ type: String }]
 });
 
-module.exports = mongoose.model('Record', record);
+module.exports = mongoose.model('Record', recordSchema);

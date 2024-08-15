@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
-const emailStatus = new mongoose.Schema({
-    bulkSendId: { type: mongoose.Schema.Types.ObjectId, ref: 'BulkEmailSend', required: true },
+const emailStatusSchema = new mongoose.Schema({
+    recordId: { type: mongoose.Schema.Types.ObjectId, ref: 'Record', required: true },
     email: { type: String, required: true },
     status: { type: String, enum: ['sent', 'failed', 'bounced'], default: 'sent' },
     bouncedAt: { type: Date },
-    bounceType: { type: String, enum: ['hard', 'soft'] } // New field for bounce type
+    bounceType: { type: String, enum: ['hard', 'soft'] }
 });
 
-module.exports = mongoose.model('EmailStatus', emailStatus);
+module.exports = mongoose.model('EmailStatus', emailStatusSchema);

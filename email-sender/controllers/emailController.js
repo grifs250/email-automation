@@ -8,17 +8,38 @@ require('dotenv').config();
 const Email = require('../models/email');
 const Record = require('../models/record');
 const EmailStatus = require('../models/emailStatus');
-// const Contact = require('../models/contact');
 
-
-const index_get = (req, res) => {
+// Render the email form
+const renderEmailForm = (req, res) => {
     res.render('index', { title: 'Send Emails', errors: [] });
 };
 
-
-const dashboard_list_get = async (req, res) => {
+// Delete a record
+const deleteRecord = async (req, res) => {
     try {
-        const records = await Record.find().sort({ sentAt: -1 }); // Sort by most recent
+        const recordId = req.params.id;
+        await Record.findByIdAndDelete(recordId);
+        await EmailStatus.deleteMany({ recordId });
+
+        res.status(200).json({ message: 'Record deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting record:', error);
+        res.status(500).json({ error: 'Failed to delete record' });
+    }
+};
+
+// Render the list of dashboard records
+const renderDashboardList = async (req, res) => {
+    try {
+        const records = await Record.find().sort({ sentAt: -1 });
+
+        if (!records) {
+            return res.status(404).render('error', { title: 'Error', error: 'No records found' });
+        }
+
+        // Check for email bounces
+        await checkBounces();
+
         res.render('dashboard_list', {
             title: 'Dashboard Overview',
             records
@@ -29,26 +50,30 @@ const dashboard_list_get = async (req, res) => {
     }
 };
 
-
-const dashboard_get = async (req, res) => {
+// Render the details of a specific dashboard record
+const renderDashboardDetails = async (req, res) => {
     try {
-        const records = await Record.findById(req.params.id);
+        const record = await Record.findById(req.params.id);
+
+        if (!record) {
+            return res.status(404).render('error', { title: 'Error', error: 'Record not found' });
+        }
+
         const emailStatuses = await EmailStatus.find({ recordId: req.params.id });
 
         res.render('dashboard', {
-            title: `Dashboard - ${records.subject}`,
-            bulkSend,
+            title: `Dashboard - ${record.subject}`,
+            record,
             emailStatuses
         });
     } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        res.status(500).render('error', { title: 'Error', error: 'Failed to load dashboard' });
+        console.error('Error fetching dashboard details:', error);
+        res.status(500).render('error', { title: 'Error', error: 'Failed to load dashboard details' });
     }
 };
 
-
-const send_emails_post = async (req, res) => {
-    // INPUT VALIDATION
+// Handle sending of emails
+const sendEmails = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).render('index', {
@@ -59,13 +84,12 @@ const send_emails_post = async (req, res) => {
     }
 
     try {
-        // Sample email data
         const emails = [
-            { name: "mikelis", email: "asdf@asdf.sdf" },
-            { name: "Miķelis", email: "mikelisindex@gmail.com" }
+            { name: "Jolina", email: "jolina@example.com" },
+            { name: "Jane", email: "jane@example.com" }
         ];
 
-        // Create and save a Record for the bulk email send
+        // Create and save a record of this email send
         const record = new Record({
             subject: req.body.subject,
             message: req.body.message,
@@ -85,7 +109,6 @@ const send_emails_post = async (req, res) => {
         let sentEmails = 0;
         let failedEmails = 0;
 
-        // Sending emails and tracking status
         for (const emailData of emails) {
             try {
                 const personalizedHtmlContent = htmlContent.replace('{{name}}', emailData.name);
@@ -112,7 +135,7 @@ const send_emails_post = async (req, res) => {
 
                 // Save failed email status
                 const emailStatus = new EmailStatus({
-                    bulkSendId: record._id,
+                    recordId: record._id,
                     email: emailData.email,
                     status: 'failed'
                 });
@@ -120,12 +143,11 @@ const send_emails_post = async (req, res) => {
             }
         }
 
-        // Update the bulk email send record with the results
+        // Update the record with the results
         record.sentEmails = sentEmails;
         record.failedEmails = failedEmails;
         await record.save();
 
-        // Redirect to the dashboard for this bulk email send
         res.redirect(`/dashboard/${record._id}`);
 
     } catch (error) {
@@ -134,10 +156,10 @@ const send_emails_post = async (req, res) => {
     }
 };
 
-// EXPORTING
 module.exports = {
-    index_get,
-    dashboard_get,
-    send_emails_post,
-    dashboard_list_get
+    renderEmailForm,
+    renderDashboardList,
+    renderDashboardDetails,
+    sendEmails,
+    deleteRecord
 };

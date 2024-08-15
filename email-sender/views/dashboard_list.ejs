@@ -4,22 +4,51 @@
     <%- include('./partials/head.ejs') %>
 </head>
 <body>
-  <div class="container">
-    <main>
-      <div class="content">
-        <section class="intro">
-          <h1>Dashboard Overview</h1>
-          <ul>
-            <% bulkSends.forEach(function(send) { %>
-              <li>
-                <a href="/dashboard/<%= send._id %>"><%= send.subject %> (Sent: <%= send.sentAt %>)</a>
-              </li>
-            <% }); %>
-          </ul>
-        </section>
-      </div>
-      <%- include('./partials/footer.ejs') %>
-    </main>
-  </div>
+    <%- include('./partials/navbar.ejs') %>
+    <div class="container">
+        <main>
+            <div class="content">
+                <section class="intro text-center">
+                    <h1>Dashboard Overview</h1>
+                    <ul class="dashboard-list">
+                        <% records.forEach(function(record) { %>
+                            <li class="card" data-url="/dashboard/<%= record._id %>">
+                                <div>
+                                    <h2><%= record.subject %></h2>
+                                    <p>Sent on: <%= record.sentAt.toLocaleString() %></p>
+                                </div>
+                                <button class="btn delete-btn">Delete</button>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </section>
+            </div>
+            <%- include('./partials/footer.ejs') %>
+        </main>
+    </div>
+
+    <!-- Include the main.js script -->
+     <!-- change to run the funciton -->
+    <script src="js/main.js"></script> 
+
+    <script>
+        // JavaScript to handle card click
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', function(event) {
+                // Check if the clicked element is not the delete button
+                if (!event.target.classList.contains('delete-btn')) {
+                    window.location.href = card.getAttribute('data-url');
+                }
+            });
+        });
+
+        // Prevent click propagation for the delete button
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                confirmDeletion(button.closest('.card').getAttribute('data-url').split('/').pop());
+            });
+        });
+    </script>
 </body>
 </html>

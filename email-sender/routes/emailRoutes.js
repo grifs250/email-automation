@@ -4,11 +4,12 @@ const emailController = require('../controllers/emailController');
 
 const router = express.Router();
 
+// GET Routes
+router.get('/', emailController.renderEmailForm);
+router.get('/dashboard', emailController.renderDashboardList);
+router.get('/dashboard/:id', emailController.renderDashboardDetails);
 
-router.get('/', emailController.index_get);
-router.get('/dashboard', emailController.dashboard_list_get);
-router.get('/dashboard/:id', emailController.dashboard_get);
-
+// POST Routes
 router.post('/send', [
     body('subject')
         .trim()
@@ -18,6 +19,9 @@ router.post('/send', [
         .trim()
         .notEmpty().withMessage('Message is required')
         .escape(),
-], emailController.send_emails_post);
+], emailController.sendEmails);
+
+// DELETE route for deleting records
+router.delete('/dashboard/:id', emailController.deleteRecord);
 
 module.exports = router;

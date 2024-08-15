@@ -1,60 +1,61 @@
+/* Base Styles */
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f5f5f5;
+    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
+    color: #333;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 40px auto;
     padding: 20px;
     background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.intro h1 {
-    font-size: 36px;
-    margin-bottom: 20px;
+h1, h2 {
+    color: #333;
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
+a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
+a:hover {
+    color: #e74c3c;
 }
 
-button {
-    background-color: #af0000;
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    background-color: #333;
+    margin: 0;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
     color: white;
-    padding: 15px;
-    border: none;
+    padding: 15px 20px;
+    display: block;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+nav ul li a:hover {
+    background-color: #444;
     border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #991212;
-}
-
-.errors p {
-    color: #af0000;
-    margin: 5px 0;
-}
-
-/* FOOTER */
+/* Footer */
 footer {
     font-size: 16px;
     background-color: #fff;
@@ -64,6 +65,100 @@ footer {
     border-top: 1px solid #ccc;
 }
 
-footer p{
-    margin-bottom: 0px;
+footer p {
+    margin-bottom: 0;
+}
+
+/* Universal Card Component */
+.card {
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+.card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.card h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #777;
+}
+
+/* Universal Button Component */
+.btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #c0392b;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+}
+
+/* Form Components */
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, textarea:focus {
+    border-color: #e74c3c;
+    outline: none;
+}
+
+/* Error Messages */
+.errors p {
+    color: #e74c3c;
+    margin: 5px 0;
+}
+
+/* Utility Classes */
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

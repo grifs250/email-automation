@@ -4,34 +4,45 @@
     <%- include('./partials/head.ejs') %>
 </head>
 <body>
-  <div class="container">
-    <main>
-      <div class="content">
-        <section class="intro">
-          <h1>Dashboard - <%= bulkSend.subject %></h1>
-          <p>Total Emails: <%= bulkSend.totalEmails %></p>
-          <p>Sent Emails: <%= bulkSend.sentEmails %></p>
-          <p>Failed Emails: <%= bulkSend.failedEmails %></p>
+    <%- include('./partials/navbar.ejs') %>
+    <div class="container">
+        <main>
+            <div class="content">
+                <section class="intro text-center">
+                    <h1>Dashboard - <%= record.subject %></h1>
+                    <div class="card mt-20">
+                        <p><strong>Total Emails:</strong> <%= record.totalEmails %></p>
+                        <p><strong>Sent Emails:</strong> <%= record.sentEmails %></p>
+                        <p><strong>Failed Emails:</strong> <%= record.failedEmails %></p>
+                    </div>
 
-          <% if (bulkSend.failedEmailList && bulkSend.failedEmailList.length > 0) { %>
-            <h2>Failed Emails:</h2>
-            <ul>
-              <% bulkSend.failedEmailList.forEach(function(email) { %>
-                <li><%= email %></li>
-              <% }); %>
-            </ul>
-          <% } %>
+                    <% if (record.failedEmailList && record.failedEmailList.length > 0) { %>
+                        <div class="card mt-20">
+                            <h2>Failed Emails:</h2>
+                            <ul>
+                                <% record.failedEmailList.forEach(function(email) { %>
+                                    <li><%= email %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    <% } %>
 
-          <h2>Email Statuses:</h2>
-          <ul>
-            <% emailStatuses.forEach(function(status) { %>
-              <li><%= status.email %> - <%= status.status %> <% if (status.status === 'bounced') { %>(Bounced at <%= status.bouncedAt %>)<% } %></li>
-            <% }); %>
-          </ul>
-        </section>
-      </div>
-      <%- include('./partials/footer.ejs') %>
-    </main>
-  </div>
+                    <div class="card mt-20">
+                        <h2>Email Statuses:</h2>
+                        <ul>
+                            <% emailStatuses.forEach(function(status) { %>
+                                <li><%= status.email %> - <%= status.status %> 
+                                    <% if (status.status === 'bounced') { %>
+                                        (Bounced at <%= status.bouncedAt.toLocaleString() %>)
+                                    <% } %>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+            <%- include('./partials/footer.ejs') %>
+        </main>
+    </div>
 </body>
 </html>

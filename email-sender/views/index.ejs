@@ -4,32 +4,37 @@
     <%- include('./partials/head.ejs') %>
 </head>
 <body>
-  <div class="container">
-    <main>
-      <div class="content">
-        <section class="intro">
-          <h1>Send Bulk Emails</h1>
-          <form action="/send" method="POST">
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" name="subject" placeholder="Enter subject" value="<%= typeof oldInput !== 'undefined' ? oldInput.subject : '' %>" required>
-            
-            <label for="message">Message:</label>
-            <textarea id="message" name="message" rows="10" placeholder="Enter message" required><%= typeof oldInput !== 'undefined' ? oldInput.message : '' %></textarea>
-            
-            <button type="submit">Send Emails</button>
+    <%- include('./partials/navbar.ejs') %>
+    <div class="container">
+        <main>
+            <div class="content">
+                <section class="intro text-center">
+                    <h1>Send Bulk Emails</h1>
+                    <form action="/send" method="POST" class="mt-20">
+                        <div class="container">
+                            <label for="subject">Subject:</label>
+                            <input type="text" id="subject" name="subject" placeholder="Enter subject" value="<%= typeof oldInput !== 'undefined' ? oldInput.subject : '' %>" required>
+                        </div>
+                        
+                        <div class="container">
+                            <label for="message">Message:</label>
+                            <textarea id="message" name="message" rows="10" placeholder="Enter message" required><%= typeof oldInput !== 'undefined' ? oldInput.message : '' %></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn">Send Emails</button>
 
-            <% if (errors && errors.length > 0) { %>
-                <div class="errors">
-                    <% errors.forEach(function(error) { %>
-                        <p><%= error.msg %></p>
-                    <% }); %>
-                </div>
-            <% } %>
-          </form>
-        </section>
-      </div>
-      <%- include('./partials/footer.ejs') %>
-    </main>
-  </div>
+                        <% if (errors && errors.length > 0) { %>
+                            <div class="errors mt-20">
+                                <% errors.forEach(function(error) { %>
+                                    <p><%= error.msg %></p>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </form>
+                </section>
+            </div>
+            <%- include('./partials/footer.ejs') %>
+        </main>
+    </div>
 </body>
 </html>
