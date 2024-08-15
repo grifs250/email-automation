@@ -4,8 +4,11 @@ const emailController = require('../controllers/emailController');
 
 const router = express.Router();
 
+
 router.get('/', emailController.index_get);
-router.get('/dashboard', emailController.dashboard_get);
+router.get('/dashboard', emailController.dashboard_list_get);
+router.get('/dashboard/:id', emailController.dashboard_get);
+
 router.post('/send', [
     body('subject')
         .trim()

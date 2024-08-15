@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head.ejs') %>
+</head>
+<body>
+  <div class="container">
+    <main>
+      <div class="content">
+        <section class="intro">
+          <h1>Dashboard Overview</h1>
+          <ul>
+            <% bulkSends.forEach(function(send) { %>
+              <li>
+                <a href="/dashboard/<%= send._id %>"><%= send.subject %> (Sent: <%= send.sentAt %>)</a>
+              </li>
+            <% }); %>
+          </ul>
+        </section>
+      </div>
+      <%- include('./partials/footer.ejs') %>
+    </main>
+  </div>
+</body>
+</html>

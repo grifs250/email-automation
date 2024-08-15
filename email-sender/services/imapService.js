@@ -15,7 +15,6 @@ async function checkBounces(sentEmails) {
         logger: false // Disable verbose logging
     });
 
-    // Select the inbox
     try {
         await client.connect();
         const mailbox = await client.mailboxOpen('INBOX');
@@ -23,18 +22,22 @@ async function checkBounces(sentEmails) {
         const bounces = [];
 
         const totalMessages = mailbox.exists; // Number of messages in the mailbox
-        const start = Math.max(1, totalMessages - 4); // Calculate the starting point for the last 10 emails
-        const end = totalMessages; // The last email
-        console.log(sentEmails);
+        const start = Math.max(1, totalMessages - 10); // Adjust this range as needed
+        const end = totalMessages;
 
         for await (let message of client.fetch(`${start}:${end}`, { envelope: true, flags: true, bodyStructure: true, source: true })) {
             const bodyText = message.source.toString();
 
-            // Check if the body contains the bounce indicator
             if (bodyText.includes("Your message wasn't delivered")) {
                 console.log("Bounce message detected");
 
-                // Use a regex to extract the email address that wasn't delivered
+                // Determine the type of bounce
+                let bounceType = 'soft';
+                if (bodyText.includes("domain not found") || bodyText.includes("invalid recipient")) {
+                    bounceType = 'hard';
+                }
+
+                // Extract the email address that wasn't delivered
                 const emailMatch = bodyText.match(/Your message wasn't delivered to\s+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
 
                 if (emailMatch) {
@@ -44,8 +47,14 @@ async function checkBounces(sentEmails) {
                     // Check if the bounced email matches any in sentEmails
                     const matchingEmail = sentEmails.find(sentEmail => sentEmail.email === bouncedEmail);
                     if (matchingEmail) {
-                        bounces.push(matchingEmail.email);
-                        console.log('Bounce detected for email:', matchingEmail.email);
+                        bounces.push({ email: matchingEmail.email, bounceType });
+                        console.log('Bounce detected for email:', matchingEmail.email, bounceType);
+
+                        // Update the email status with the bounce type
+                        await IndividualEmailStatus.findOneAndUpdate(
+                            { bulkSendId: matchingEmail.bulkSendId, email: matchingEmail.email },
+                            { status: 'bounced', bouncedAt: new Date(), bounceType: bounceType }
+                        );
                     }
                 }
             }
@@ -58,5 +67,6 @@ async function checkBounces(sentEmails) {
     } finally {
         await client.logout(); // Ensure the connection is closed after operation
     }
-};
+}
+
 module.exports = { checkBounces };
