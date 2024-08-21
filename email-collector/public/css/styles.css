@@ -282,6 +282,11 @@ section.socials h2 {
     opacity: 1;
 }
 
+.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
 .info-icon-container:hover .info-icon {
     transform: scale(1.2);
 }
