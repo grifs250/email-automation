@@ -11,12 +11,12 @@
                 <section class="intro text-center">
                     <h1>Send Bulk Emails</h1>
                     <form action="/send" method="POST" class="mt-20">
-                        <div class="container">
+                        <div class="section">
                             <label for="subject">Subject:</label>
                             <input type="text" id="subject" name="subject" placeholder="Enter subject" value="<%= typeof oldInput !== 'undefined' ? oldInput.subject : '' %>" required>
                         </div>
                         
-                        <div class="container">
+                        <div class="section">
                             <label for="message">Message:</label>
                             <textarea id="message" name="message" rows="10" placeholder="Enter message" required><%= typeof oldInput !== 'undefined' ? oldInput.message : '' %></textarea>
                         </div>
