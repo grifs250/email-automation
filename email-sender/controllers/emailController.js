@@ -8,11 +8,14 @@ require('dotenv').config();
 const Email = require('../models/email');
 const Record = require('../models/record');
 const EmailStatus = require('../models/emailStatus');
+const ScheduledEmail = require('../models/scheduledEmail');
 
 // Render the email form
 const renderEmailForm = (req, res) => {
     res.render('index', { title: 'Send Emails', errors: [] });
 };
+
+
 
 // Delete a record
 const deleteRecord = async (req, res) => {
@@ -21,7 +24,7 @@ const deleteRecord = async (req, res) => {
         await Record.findByIdAndDelete(recordId);
         await EmailStatus.deleteMany({ recordId });
 
-        res.status(200).json({ message: 'Record deleted successfully' });
+        res.status(200).json({ message: 'Record  deleted successfully' });
     } catch (error) {
         console.error('Error deleting record:', error);
         res.status(500).json({ error: 'Failed to delete record' });
@@ -74,6 +77,7 @@ const renderDashboardDetails = async (req, res) => {
 
 // Handle sending of emails
 const sendEmails = async (req, res) => {
+    // Validate incoming request data
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).render('index', {
@@ -84,12 +88,19 @@ const sendEmails = async (req, res) => {
     }
 
     try {
-        const emails = [
-            { name: "Jolina", email: "jolina@example.com" },
-            { name: "Jane", email: "jane@example.com" }
-        ];
+        let emails;
 
-        // Create and save a record of this email send
+        // Determine the list of emails to send to, based on user selection
+        if (req.body.emailList === 'custom') {
+            // If the user selected "Custom Emails", split the custom email input by commas
+            emails = req.body.customEmails.split(',').map(email => email.trim());
+        } else {
+            // Otherwise, fetch the list of emails from the database based on the selected list name
+            const emailList = await Email.find({ listName: req.body.emailList });
+            emails = emailList.map(e => e.email);
+        }
+
+        // Create a new record of the email sending action in the database
         const record = new Record({
             subject: req.body.subject,
             message: req.body.message,
@@ -97,57 +108,78 @@ const sendEmails = async (req, res) => {
         });
         await record.save();
 
+        // If the user has scheduled the emails, save the schedule in the database
+        if (req.body.scheduleTime) {
+            const scheduledEmail = new ScheduledEmail({
+                recordId: record._id,
+                scheduledTime: new Date(req.body.scheduleTime),
+            });
+            await scheduledEmail.save();
+        }
+
+        // Configure the email transporter using Nodemailer
         const EMAIL = process.env.EMAIL;
         const PASS = process.env.APP_PASS;
-
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: { user: EMAIL, pass: PASS }
         });
 
-        const htmlContent = fs.readFileSync(path.join(__dirname, '../views/emailTemplate.html'), 'utf-8');
+        // Determine the email content, either custom or template-based
+        let htmlContent;
+        if (req.body.emailTemplate === 'custom') {
+            // Use the custom message provided by the user
+            htmlContent = req.body.message;
+        } else {
+            // Load the selected HTML template from the views directory
+            htmlContent = fs.readFileSync(path.join(__dirname, `../views/${req.body.emailTemplate}.html`), 'utf-8');
+        }
+
+        // Counters to track the number of successfully sent and failed emails
         let sentEmails = 0;
         let failedEmails = 0;
 
-        for (const emailData of emails) {
+        // Loop through each email address and attempt to send the email
+        for (const email of emails) {
             try {
-                const personalizedHtmlContent = htmlContent.replace('{{name}}', emailData.name);
                 const message = {
                     from: EMAIL,
-                    to: emailData.email,
+                    to: email,
                     subject: req.body.subject,
-                    html: personalizedHtmlContent,
+                    html: htmlContent.replace('{{name}}', email),
                 };
 
+                // Send the email using the transporter
                 await transporter.sendMail(message);
                 sentEmails++;
 
-                // Save successful email status
+                // Record the successful email in the database
                 const emailStatus = new EmailStatus({
                     recordId: record._id,
-                    email: emailData.email
+                    email
                 });
                 await emailStatus.save();
 
             } catch (err) {
-                console.error(`Failed to send email to ${emailData.email}:`, err);
+                console.error(`Failed to send email to ${email}:`, err);
                 failedEmails++;
 
-                // Save failed email status
+                // Record the failed email in the database
                 const emailStatus = new EmailStatus({
                     recordId: record._id,
-                    email: emailData.email,
+                    email,
                     status: 'failed'
                 });
                 await emailStatus.save();
             }
         }
 
-        // Update the record with the results
+        // Update the record with the final counts of sent and failed emails
         record.sentEmails = sentEmails;
         record.failedEmails = failedEmails;
         await record.save();
 
+        // Redirect to the dashboard view of this specific record
         res.redirect(`/dashboard/${record._id}`);
 
     } catch (error) {
@@ -155,6 +187,7 @@ const sendEmails = async (req, res) => {
         res.status(500).render('error', { title: 'Error', error: `Server Error: ${error}` });
     }
 };
+
 
 module.exports = {
     renderEmailForm,

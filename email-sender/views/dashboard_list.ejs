@@ -5,6 +5,7 @@
 </head>
 <body>
     <%- include('./partials/navbar.ejs') %>
+    <div id="successMessage" class="alert alert-success" style="display: none;"></div>
     <div class="container">
         <main>
             <div class="content">
@@ -17,7 +18,7 @@
                                     <h2><%= record.subject %></h2>
                                     <p>Sent on: <%= record.sentAt.toLocaleString() %></p>
                                 </div>
-                                <button class="btn delete-btn">Delete</button>
+                                <button class="btn delete-btn" data-id="<%= record._id %>">Delete</button>
                             </li>
                         <% }); %>
                     </ul>
@@ -26,7 +27,6 @@
             <%- include('./partials/footer.ejs') %>
         </main>
     </div>
-
     <script src="js/main.js"></script> 
 </body>
 </html>
