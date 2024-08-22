@@ -1,5 +1,5 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const appController = require('../controller/appController.js');
 
 const router = express.Router();
@@ -7,8 +7,9 @@ const router = express.Router();
 // Routes
 router.get('/', appController.index_get);
 router.get('/tnx', appController.tnx_get);
+
 router.post('/tnx', [
-    // Validate and sanitize inputs "provides additional security"
+    // Validate and sanitize inputs
     body('name')
         .trim()
         .isLength({ min: 2 }).withMessage('Vārdam ir jābūt vismaz 2 rakstzīmju garumā')
@@ -16,7 +17,7 @@ router.post('/tnx', [
         .escape(),
     body('email')
         .isEmail().withMessage('Lūdzu ievadiet derīgu e-pasta adresi')
-        .normalizeEmail(),
+        .normalizeEmail({ gmail_remove_dots: false }) // Preserve dots in the local part
 ], appController.tnx_post);
 
 module.exports = router;
