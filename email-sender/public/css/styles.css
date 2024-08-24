@@ -23,14 +23,21 @@ body {
     margin: 40px auto;
     padding: 20px;
     background: var(--secondary-bg-color);
-    border-radius: 8px;
+    border-radius: 20px;
     box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .section {
     text-align: center;
-    padding: 40px 20px;
-    color: #fff;
+}
+
+hr {
+    
+    display: block; /* Ensure the hr is displayed */
+    border: 0;
+    height: 3px;
+    background: var(--accent-color); /* Use an accent color for emphasis */
+    margin: 20px 0; /* Space around the line */
 }
 
 /* Typography */
@@ -95,7 +102,7 @@ form.centered-form {
     flex-direction: column;
     align-items: center;
     margin: 0 auto;
-    max-width: 600px;
+    max-width: 800px;
 }
 
 form.centered-form .section {
@@ -103,11 +110,20 @@ form.centered-form .section {
 }
 
 /* Card Component */
+.box {
+    background-color: var(--secondary-bg-color);
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+
+}
+
 .card {
     background-color: var(--secondary-bg-color);
     margin-bottom: 20px;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 15px;
     box-shadow: 0 2px 8px var(--shadow-color);
     display: flex;
     justify-content: space-between;
@@ -191,7 +207,8 @@ form.centered-form .section {
 }
 
 /* Add Schedule Button - Floating Plus Icon */
-.add-schedule-btn {
+/* Mybe later */
+/* .add-schedule-btn {
     position: fixed;
     bottom: 20px;
     left: 20px;
@@ -203,7 +220,7 @@ form.centered-form .section {
     align-items: center;
     font-size: 24px;
     box-shadow: 0 4px 10px var(--shadow-color);
-}
+} */
 
 /* Hidden Sections */
 #customContentSection,
@@ -214,7 +231,7 @@ form.centered-form .section {
 
 /* Form Components */
 input, textarea {
-    width: 100%;
+    width: 90%;
     padding: 12px;
     margin-bottom: 20px;
     background-color: var(--primary-bg-color);
@@ -225,9 +242,28 @@ input, textarea {
     transition: border-color 0.3s ease;
 }
 
+select{
+    width: 50%;
+    padding: 12px;
+    background-color: var(--primary-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 14px;
+    color: var(--text-color);
+    transition: border-color 0.3s ease;
+}
+
+
 input:focus, textarea:focus {
     border-color: var(--accent-color);
     outline: none;
+}
+
+
+.schedule {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
 }
 
 /* Error Messages */
@@ -239,6 +275,10 @@ input:focus, textarea:focus {
 /* Utility Classes */
 .mt-20 {
     margin-top: 20px;
+}
+
+.mt-10 {
+    margin-top: 10px;
 }
 
 .mb-20 {
@@ -303,4 +343,52 @@ input:focus, textarea:focus {
     color: #155724;
     background-color: #d4edda;
     border-color: #c3e6cb;
+}
+
+
+
+/* Styling for the email statuses table */
+.email-statuses-card {
+    padding-bottom: 30px;
+}
+
+.email-statuses-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.email-statuses-table th, .email-statuses-table td {
+    padding: 12px 15px;
+    text-align: left;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.email-statuses-table th {
+    background-color: var(--secondary-bg-color);
+    color: var(--text-muted-color);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.email-statuses-table tr {
+    transition: background-color 0.3s ease;
+}
+
+.email-statuses-table tr:hover {
+    background-color: var(--primary-bg-color);
+}
+
+.email-statuses-table td {
+    background-color: var(--secondary-bg-color);
+}
+
+/* Add spacing to ensure rows aren't too close */
+.email-statuses-table tr + tr {
+    margin-top: 10px;
+}
+
+/* Increase row height for better readability */
+.email-statuses-table tr {
+    height: 50px;
 }

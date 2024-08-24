@@ -7,6 +7,7 @@ const path = require('path');
 require('dotenv').config();
 
 const emailRoutes = require('./routes/emailRoutes');
+const listRoutes = require('./routes/lists');
 
 // Express app
 const app = express();
@@ -25,6 +26,27 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use(helmet());
 
+// // Track email opens
+// router.get('/track-open', async (req, res) => {
+//     const { email, recordId } = req.query;
+
+//     try {
+//         await EmailStatus.findOneAndUpdate(
+//             { recordId, email },
+//             { $inc: { opens: 1 } }
+//         );
+//         res.status(200).send(); // Invisible response
+//     } catch (error) {
+//         console.error('Error tracking open:', error);
+//         res.status(500).send();
+//     }
+// });
+
+// // Track email clicks
+// router.get('/track-click', async (req, res) => {
+//     const { email, recordId, url } = req.query;
+// });
+
 // Rate limiting middleware
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -39,6 +61,7 @@ app.use(limiter);
 
 // Routes
 app.use(emailRoutes);
+app.use('/lists', listRoutes);
 
 // 404 Page Not Found handler
 app.use((req, res) => {

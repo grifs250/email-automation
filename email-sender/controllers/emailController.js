@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
@@ -10,11 +11,59 @@ const Record = require('../models/record');
 const EmailStatus = require('../models/emailStatus');
 const ScheduledEmail = require('../models/scheduledEmail');
 
-// Render the email form
-const renderEmailForm = (req, res) => {
-    res.render('index', { title: 'Send Emails', errors: [] });
+const getEmailCompatibleCollections = async () => {
+    const compatibleCollections = [];
+
+    try {
+        const collections = await mongoose.connection.db.listCollections().toArray();
+
+        for (const collection of collections) {
+            try {
+                const DynamicModel = mongoose.model(collection.name, Email.schema, collection.name);
+                
+                // Check if the collection has documents
+                const sampleDocument = await DynamicModel.findOne();
+                
+                if (sampleDocument) {
+                    // Validate the document against the schema
+                    const validationError = sampleDocument.validateSync();
+                    
+                    if (!validationError) {
+                        // Add to list only if the document is valid
+                        compatibleCollections.push(collection.name);
+                    }
+                }
+            } catch (error) {
+                console.error(`Collection ${collection.name} is not compatible: ${error.message}`);
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching collections:', error);
+    }
+
+    return compatibleCollections;
 };
 
+const renderEmailForm = async (req, res) => {
+    try {
+        const emailLists = await getEmailCompatibleCollections();
+
+        // Load available templates from the 'views/templates' directory
+        const templatesDir = path.join(__dirname, '../views/templates');
+        const templates = fs.readdirSync(templatesDir).filter(file => file.endsWith('.html'));
+
+        // Render the view and pass emailLists and templates to the frontend
+        res.render('index', { 
+            title: 'Send Emails', 
+            errors: [],
+            emailLists,
+            templates
+        });
+    } catch (error) {
+        console.error('Error fetching email form data:', error);
+        res.status(500).json({ error: 'Failed to load email form data' });
+    }
+};
 
 
 // Delete a record
@@ -62,18 +111,19 @@ const renderDashboardDetails = async (req, res) => {
             return res.status(404).render('error', { title: 'Error', error: 'Record not found' });
         }
 
-        const emailStatuses = await EmailStatus.find({ recordId: req.params.id });
+        const emailStatus = await EmailStatus.find({ recordId: req.params.id });
 
         res.render('dashboard', {
             title: `Dashboard - ${record.subject}`,
             record,
-            emailStatuses
+            emailStatus
         });
     } catch (error) {
         console.error('Error fetching dashboard details:', error);
         res.status(500).render('error', { title: 'Error', error: 'Failed to load dashboard details' });
     }
 };
+
 
 // Handle sending of emails
 const sendEmails = async (req, res) => {
@@ -88,19 +138,20 @@ const sendEmails = async (req, res) => {
     }
 
     try {
+        const selectedList = req.body.emailList;
         let emails;
 
-        // Determine the list of emails to send to, based on user selection
-        if (req.body.emailList === 'custom') {
-            // If the user selected "Custom Emails", split the custom email input by commas
+        if (selectedList === 'custom') {
+            // Use custom emails provided by the user
             emails = req.body.customEmails.split(',').map(email => email.trim());
         } else {
-            // Otherwise, fetch the list of emails from the database based on the selected list name
-            const emailList = await Email.find({ listName: req.body.emailList });
-            emails = emailList.map(e => e.email);
+            // Dynamically create a model for the selected collection
+            const DynamicEmailModel = mongoose.model(selectedList, Email.schema, selectedList);
+            emails = await DynamicEmailModel.find({}).select('email name');
         }
 
-        // Create a new record of the email sending action in the database
+
+        // Create a new record for the email campaign
         const record = new Record({
             subject: req.body.subject,
             message: req.body.message,
@@ -108,7 +159,7 @@ const sendEmails = async (req, res) => {
         });
         await record.save();
 
-        // If the user has scheduled the emails, save the schedule in the database
+        // Handle scheduled emails
         if (req.body.scheduleTime) {
             const scheduledEmail = new ScheduledEmail({
                 recordId: record._id,
@@ -117,7 +168,7 @@ const sendEmails = async (req, res) => {
             await scheduledEmail.save();
         }
 
-        // Configure the email transporter using Nodemailer
+        // Setup email transporter
         const EMAIL = process.env.EMAIL;
         const PASS = process.env.APP_PASS;
         const transporter = nodemailer.createTransport({
@@ -125,35 +176,32 @@ const sendEmails = async (req, res) => {
             auth: { user: EMAIL, pass: PASS }
         });
 
-        // Determine the email content, either custom or template-based
+        // Prepare email content (either custom or template)
         let htmlContent;
         if (req.body.emailTemplate === 'custom') {
-            // Use the custom message provided by the user
             htmlContent = req.body.message;
         } else {
-            // Load the selected HTML template from the views directory
-            htmlContent = fs.readFileSync(path.join(__dirname, `../views/${req.body.emailTemplate}.html`), 'utf-8');
+            htmlContent = fs.readFileSync(path.join(__dirname, `../views/templates/${req.body.emailTemplate}`), 'utf-8');
         }
 
-        // Counters to track the number of successfully sent and failed emails
         let sentEmails = 0;
-        let failedEmails = 0;
+        let bouncedEmails = 0;
 
-        // Loop through each email address and attempt to send the email
         for (const email of emails) {
             try {
                 const message = {
                     from: EMAIL,
                     to: email,
                     subject: req.body.subject,
-                    html: htmlContent.replace('{{name}}', email),
+                    html: `
+                        ${htmlContent.replace('{{name}}', email)}
+                        <img src="https://mikelissilins.com/track-open?email=${encodeURIComponent(email)}&recordId=${record._id}" width="1" height="1" style="display:none;">
+                    `,
                 };
 
-                // Send the email using the transporter
                 await transporter.sendMail(message);
                 sentEmails++;
 
-                // Record the successful email in the database
                 const emailStatus = new EmailStatus({
                     recordId: record._id,
                     email
@@ -162,24 +210,21 @@ const sendEmails = async (req, res) => {
 
             } catch (err) {
                 console.error(`Failed to send email to ${email}:`, err);
-                failedEmails++;
+                bouncedEmails++;
 
-                // Record the failed email in the database
-                const emailStatus = new EmailStatus({
-                    recordId: record._id,
-                    email,
-                    status: 'failed'
-                });
-                await emailStatus.save();
+                await EmailStatus.findOneAndUpdate(
+                    { email },
+                    { status: 'bounced', bouncedAt: new Date(), bounceType: 'hard' } // Example
+                );
             }
         }
 
-        // Update the record with the final counts of sent and failed emails
+        // Update record with sent and bounced emails
         record.sentEmails = sentEmails;
-        record.failedEmails = failedEmails;
+        record.bouncedEmails = bouncedEmails;
         await record.save();
 
-        // Redirect to the dashboard view of this specific record
+        // Redirect to the specific dashboard view for this record
         res.redirect(`/dashboard/${record._id}`);
 
     } catch (error) {
@@ -194,5 +239,5 @@ module.exports = {
     renderDashboardList,
     renderDashboardDetails,
     sendEmails,
-    deleteRecord
+    deleteRecord,
 };

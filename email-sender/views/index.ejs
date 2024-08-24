@@ -8,55 +8,60 @@
 </head>
 <body>
     <%- include('./partials/navbar.ejs') %>
+
     <div class="container">
-        <main>
-            <div class="content">
-                <section class="intro text-center">
-                    <h1>Send Bulk Emails</h1>
-                    <form action="/send" method="POST" class="mt-20 centered-form">
-                        <div class="section">
-                            <label for="emailTemplate">Choose Template:</label>
-                            <select id="emailTemplate" name="emailTemplate">
-                                <option value="template1">Template 1</option>
-                                <option value="template2">Template 2</option>
-                                <option value="custom">Custom Content</option>
-                            </select>
-                        </div>
-                        <div id="customContentSection" class="section" style="display: none;">
-                            <label for="subject">Subject:</label>
-                            <input type="text" id="subject" name="subject" placeholder="Enter subject">
-                            <label for="message">Message:</label>
-                            <textarea id="message" name="message" rows="5" placeholder="Enter message"></textarea>
-                        </div>
-                        <div class="section">
-                            <label for="emailList">Choose Email List:</label>
-                            <select id="emailList" name="emailList">
-                                <option value="list1">List 1</option>
-                                <option value="list2">List 2</option>
-                                <option value="custom">Custom Emails</option>
-                            </select>
-                        </div>
-                        <div id="customEmailSection" class="section" style="display: none;">
-                            <label for="customEmails">Enter Emails (comma-separated):</label>
-                            <textarea id="customEmails" name="customEmails" rows="3" placeholder="Enter emails"></textarea>
-                        </div>
-                        <div class="section">
-                            <label for="scheduleToggle">Schedule Email:</label>
-                            <input type="checkbox" id="scheduleToggle" name="scheduleToggle">
-                            <div id="scheduleTimeWrapper" style="display: none;">
-                                <label for="scheduleTime">Schedule Time:</label>
-                                <input type="datetime-local" id="scheduleTime" name="scheduleTime">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn large-btn">Send Emails</button>
-                    </form>
-                    <button type="button" id="addScheduleBtn" class="btn add-schedule-btn">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </section>
+        <div class="text-center">
+            <h1>Send Bulk Emails</h1>
+        </div>     
+        <form action="/send" method="POST" class="mt-20 centered-form">
+            
+            <!-- Email List Selection -->
+            <div class="box section">
+                <label for="emailList">Choose Email List:</label>
+                <select id="emailList" name="emailList">
+                    <% emailLists.forEach(function(listName) { %>
+                        <option value="<%= listName %>"><%= listName %></option>
+                    <% }); %>
+                    <option value="custom">Custom Emails</option>
+                </select>
+                <div id="customEmailSection" class="mt-20" style="display: none;">
+                    <label for="customEmails">Enter Emails (comma-separated):</label>
+                    <textarea id="customEmails" name="customEmails" rows="3" placeholder="Enter Emails:"></textarea>
+                </div>
             </div>
-            <%- include('./partials/footer.ejs') %>
-        </main>
+
+            <!-- Template Selection -->
+            <div class="box section">
+                <label for="emailTemplate">Choose Template:</label>
+                <select id="emailTemplate" name="emailTemplate">
+                    <% templates.forEach(function(template) { %>
+                        <option value="<%= template %>"><%= template.replace('.html', '') %></option>
+                    <% }); %>
+                    <option value="custom">Custom Content</option>
+                </select>
+                <div id="customContentSection" class="mt-20" style="display: none;">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" placeholder="Enter subject">
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Enter message"></textarea>
+                </div>
+            </div>
+
+            <!-- Scheduling Options -->
+            <div class="box section">
+                <div class="schedule">
+                    <label for="scheduleToggle">Scheduled Email:</label>
+                    <input type="checkbox" id="scheduleToggle" name="scheduleToggle">
+                </div>
+                <div id="scheduleTimeWrapper" class="mt-10" style="display: none;">
+                    <input type="datetime-local" id="scheduleTime" name="scheduleTime">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn large-btn">Send Emails</button>
+        </form>
+        <%- include('./partials/footer.ejs') %>
     </div>
     <script src="js/main.js"></script> 
 </body>

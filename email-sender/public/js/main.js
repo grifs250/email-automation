@@ -18,6 +18,91 @@ document.addEventListener('DOMContentLoaded', function () {
     initGlobalFeatures();
 });
 
+async function initBulkEmailPage() {
+    const emailList = document.getElementById("emailList");
+    const customEmailSection = document.getElementById("customEmailSection");
+    const emailTemplate = document.getElementById("emailTemplate");
+    const customContentSection = document.getElementById("customContentSection");
+    const scheduleToggle = document.getElementById("scheduleToggle");
+    const scheduleTimeWrapper = document.getElementById("scheduleTimeWrapper");
+
+    // Fetch email lists and templates from the server
+    // await renderEmailForm();
+
+    // Set initial visibility based on current selections
+    if (emailList.value === "custom") {
+        customEmailSection.style.display = "block";
+    } else {
+        customEmailSection.style.display = "none";
+    }
+
+    if (emailTemplate.value === "custom") {
+        customContentSection.style.display = "block";
+    } else {
+        customContentSection.style.display = "none";
+    }
+
+    if (scheduleToggle.checked) {
+        scheduleTimeWrapper.style.display = "block";
+    } else {
+        scheduleTimeWrapper.style.display = "none";
+    }
+
+    // Toggle custom email section visibility on change
+    emailList.addEventListener("change", function() {
+        customEmailSection.style.display = emailList.value === "custom" ? "block" : "none";
+    });
+
+    // Toggle custom content section visibility on change
+    emailTemplate.addEventListener("change", function() {
+        customContentSection.style.display = emailTemplate.value === "custom" ? "block" : "none";
+    });
+
+    // Toggle schedule time visibility on change
+    scheduleToggle.addEventListener("change", function() {
+        scheduleTimeWrapper.style.display = scheduleToggle.checked ? "block" : "none";
+    });
+
+    // Add another scheduled email section
+    // Mybe later
+    // document.getElementById('addScheduleBtn').addEventListener('click', function() {
+    //     const form = document.querySelector('form.centered-form');
+    //     const scheduleSection = document.querySelector('.section:nth-child(5)').cloneNode(true);
+    //     form.insertBefore(scheduleSection, document.querySelector('.large-btn'));
+    // });
+}
+
+// Function to fetch email lists and templates, and populate the form
+// async function renderEmailForm() {
+//     try {
+//         // Fetch email lists and templates from the server
+//         const response = await fetch('/');
+//         const data = await response.json();
+
+//         const emailListSelect = document.getElementById('emailList');
+//         const emailTemplateSelect = document.getElementById('emailTemplate');
+
+//         // POPULATE email lists dropdown
+//         data.emailLists.forEach(list => {
+//             const option = document.createElement('option');
+//             option.value = list.email; // Assuming email is the field you want to use
+//             option.textContent = list.email;
+//             emailListSelect.appendChild(option);
+//         });
+
+//         // POPULATE email templates dropdown
+//         data.templates.forEach(template => {
+//             const option = document.createElement('option');
+//             option.value = template;
+//             option.textContent = template.replace('.html', ''); // Remove .html extension for display
+//             emailTemplateSelect.appendChild(option);
+//         });
+//     } catch (error) {
+//         console.error('Error fetching email form data:', error);
+//         alert('Failed to load email form data.');
+//     }
+// }
+
 // Function to initialize dashboard page specific features
 function initDashboardPage() {
     // Attach event listeners for delete buttons
@@ -37,34 +122,6 @@ function initDashboardPage() {
             const url = this.getAttribute('data-url');
             window.location.href = url;
         });
-    });
-}
-
-// Function to initialize bulk email page specific features
-function initBulkEmailPage() {
-    // Toggle custom content section visibility
-    document.getElementById('emailTemplate').addEventListener('change', function() {
-        const customContentSection = document.getElementById('customContentSection');
-        customContentSection.style.display = this.value === 'custom' ? 'block' : 'none';
-    });
-
-    // Toggle custom email section visibility
-    document.getElementById('emailList').addEventListener('change', function() {
-        const customEmailSection = document.getElementById('customEmailSection');
-        customEmailSection.style.display = this.value === 'custom' ? 'block' : 'none';
-    });
-
-    // Toggle schedule time visibility
-    document.getElementById('scheduleToggle').addEventListener('change', function() {
-        const scheduleTimeWrapper = document.getElementById('scheduleTimeWrapper');
-        scheduleTimeWrapper.style.display = this.checked ? 'block' : 'none';
-    });
-
-    // Add another scheduled email
-    document.getElementById('addScheduleBtn').addEventListener('click', function() {
-        const form = document.querySelector('form.centered-form');
-        const scheduleSection = document.querySelector('.section:nth-child(5)').cloneNode(true);
-        form.insertBefore(scheduleSection, document.querySelector('.large-btn'));
     });
 }
 

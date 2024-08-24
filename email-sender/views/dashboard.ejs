@@ -10,35 +10,54 @@
             <div class="content">
                 <section class="intro text-center">
                     <h1>Dashboard - <%= record.subject %></h1>
-                    <div class="card mt-20">
+                    <div class="box summary-card mt-20">
+                        <h2>Email Summary</h2>
                         <p><strong>Total Emails:</strong> <%= record.totalEmails %></p>
-                        <p><strong>Sent Emails:</strong> <%= record.sentEmails %></p>
-                        <p><strong>Failed Emails:</strong> <%= record.failedEmails %></p>
+                        <p><strong>Sent Emails:</strong> <%= record.sentEmails %> (<%= (record.sentEmails / record.totalEmails * 100).toFixed(2) %>%)</p>
+                        <p><strong>Bounced Emails:</strong> <%= record.bouncedEmails %> (<%= (record.bouncedEmails / record.totalEmails * 100).toFixed(2) %>%)</p>
+                        <p><strong>Opened Emails:</strong> <%= record.openedEmails %> (<%= (record.openedEmails / record.totalEmails * 100).toFixed(2) %>%)</p>
+                        <p><strong>Clicked Emails:</strong> <%= record.clickedEmails %> (<%= (record.clickedEmails / record.totalEmails * 100).toFixed(2) %>%)</p>
                     </div>
 
-                    <% if (record.failedEmailList && record.failedEmailList.length > 0) { %>
+                    <% if (record.bouncedEmails && record.bouncedEmails.length > 0) { %>
                         <div class="card mt-20">
-                            <h2>Failed Emails:</h2>
+                            <h2>Bounced Emails:</h2>
                             <ul>
-                                <% record.failedEmailList.forEach(function(email) { %>
+                                <% record.bouncedEmails.forEach(function(email) { %>
                                     <li><%= email %></li>
                                 <% }); %>
                             </ul>
                         </div>
                     <% } %>
 
-                    <div class="card mt-20">
-                        <h2>Email Statuses:</h2>
-                        <ul>
-                            <% emailStatuses.forEach(function(status) { %>
-                                <li><%= status.email %> - <%= status.status %> 
-                                    <% if (status.status === 'bounced') { %>
-                                        (Bounced at <%= status.bouncedAt.toLocaleString() %>)
-                                    <% } %>
-                                </li>
-                            <% }); %>
-                        </ul>
+                    <div class="box email-statuses-card">
+                        <h2>Email Statuses</h2>
+                        <table class="email-statuses-table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Bounced At</th>
+                                    <th>Bounce Type</th>
+                                    <th>Opens</th>
+                                    <th>Clicks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% emailStatus.forEach(function(status) { %>
+                                    <tr>
+                                        <td><%= status.email %></td>
+                                        <td><%= status.status %></td>
+                                        <td><%= status.status === 'bounced' ? status.bouncedAt.toLocaleString() : '-' %></td>
+                                        <td><%= status.status === 'bounced' ? status.bounceType : '-' %></td>
+                                        <td><%= status.opens || '-' %></td>
+                                        <td><%= status.clicks || '-' %></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
                     </div>
+                    
                 </section>
             </div>
             <%- include('./partials/footer.ejs') %>

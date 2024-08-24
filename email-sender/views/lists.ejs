@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head.ejs') %>
+    <style>
+        /* Additional CSS if needed */
+    </style>
+</head>
+<body>
+    <%- include('./partials/navbar.ejs') %>
+
+    <div class="container">
+        <div class="text-center">
+            <h1>Create Email List</h1>
+        </div>     
+        <form action="/lists/create" method="POST" class="mt-20 centered-form">
+            
+            <!-- List Name Input -->
+            <div class="box section">
+                <label for="listName">List Name:</label>
+                <input type="text" id="listName" name="listName" placeholder="Enter list name" required>
+            </div>
+
+            <!-- Emails Input -->
+            <div class="box section">
+                <label for="emails">Enter Emails (comma-separated):</label>
+                <textarea id="emails" name="emails" rows="5" placeholder="Enter emails here, separated by commas" required></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn large-btn">Create Email List</button>
+        </form>
+        
+        <!-- Display any errors -->
+        <% if (errors && errors.length > 0) { %>
+            <div class="errors">
+                <% errors.forEach(function(error) { %>
+                    <p><%= error.msg %></p>
+                <% }); %>
+            </div>
+        <% } %>
+        
+        <%- include('./partials/footer.ejs') %>
+    </div>
+</body>
+</html>
