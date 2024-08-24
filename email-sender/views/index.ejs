@@ -14,6 +14,11 @@
             <h1>Send Bulk Emails</h1>
         </div>     
         <form action="/send" method="POST" class="mt-20 centered-form">
+            <div class="box section">
+                <label for="subject">Subject:</label>
+                <input class="subject-input" type="text" id="subject" name="subject" placeholder="Enter subject">
+            </div>
+
             
             <!-- Email List Selection -->
             <div class="box section">
@@ -40,8 +45,6 @@
                     <option value="custom">Custom Content</option>
                 </select>
                 <div id="customContentSection" class="mt-20" style="display: none;">
-                    <label for="subject">Subject:</label>
-                    <input type="text" id="subject" name="subject" placeholder="Enter subject">
                     <label for="message">Message:</label>
                     <textarea id="message" name="message" rows="5" placeholder="Enter message"></textarea>
                 </div>

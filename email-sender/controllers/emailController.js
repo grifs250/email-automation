@@ -111,12 +111,19 @@ const renderDashboardDetails = async (req, res) => {
             return res.status(404).render('error', { title: 'Error', error: 'Record not found' });
         }
 
-        const emailStatus = await EmailStatus.find({ recordId: req.params.id });
+        const emailStatuses = await EmailStatus.find({ recordId: req.params.id });
+
+        // Calculate the bounce count dynamically
+        const bouncedEmailsCount = emailStatuses.filter(status => status.status === 'bounced').length;
+
+        // Update the record with the new bouncedEmails count
+        record.bouncedEmails = bouncedEmailsCount;
+        await record.save();
 
         res.render('dashboard', {
             title: `Dashboard - ${record.subject}`,
             record,
-            emailStatus
+            emailStatuses,
         });
     } catch (error) {
         console.error('Error fetching dashboard details:', error);
@@ -139,23 +146,28 @@ const sendEmails = async (req, res) => {
 
     try {
         const selectedList = req.body.emailList;
-        let emails;
+        let emailList;
 
         if (selectedList === 'custom') {
             // Use custom emails provided by the user
-            emails = req.body.customEmails.split(',').map(email => email.trim());
+            emailList = req.body.customEmails.split(',').map(email => email.trim());
         } else {
-            // Dynamically create a model for the selected collection
-            const DynamicEmailModel = mongoose.model(selectedList, Email.schema, selectedList);
-            emails = await DynamicEmailModel.find({}).select('email name');
-        }
+            // Dynamically create or retrieve a model for the selected collection
+            let DynamicEmailModel;
+            if (mongoose.models[selectedList]) {
+                DynamicEmailModel = mongoose.model(selectedList);
+            } else {
+                DynamicEmailModel = mongoose.model(selectedList, Email.schema, selectedList);
+            }
 
+            const emails = await DynamicEmailModel.find({}).select('email');
+            emailList = emails.map(item => item.email);
+        }
 
         // Create a new record for the email campaign
         const record = new Record({
             subject: req.body.subject,
-            message: req.body.message,
-            totalEmails: emails.length
+            totalEmails: emailList.length
         });
         await record.save();
 
@@ -179,42 +191,49 @@ const sendEmails = async (req, res) => {
         // Prepare email content (either custom or template)
         let htmlContent;
         if (req.body.emailTemplate === 'custom') {
-            htmlContent = req.body.message;
+            htmlContent = fs.readFileSync(path.join(__dirname, `../views/templates/template/emailNewsletter.html`), 'utf-8');
+            htmlContent = htmlContent.replace('{{message}}', req.body.message);
         } else {
-            htmlContent = fs.readFileSync(path.join(__dirname, `../views/templates/${req.body.emailTemplate}`), 'utf-8');
+            htmlContent = fs.readFileSync(path.join(__dirname, `../views/templates/${req.body.emailTemplate}.html`), 'utf-8');
         }
+
+        // Include a tracking pixel for opens
+        htmlContent += `<img src="https://yourdomain.com/track-open?recordId=${record._id}&email={{email}}" width="1" height="1" style="display:none;">`;
+
 
         let sentEmails = 0;
         let bouncedEmails = 0;
 
-        for (const email of emails) {
+        for (const email of emailList) {
+            if (!email) {
+                console.error('Encountered a null or undefined email, skipping.');
+                continue; // Skip this iteration
+            }
+        
             try {
                 const message = {
                     from: EMAIL,
                     to: email,
                     subject: req.body.subject,
-                    html: `
-                        ${htmlContent.replace('{{name}}', email)}
-                        <img src="https://mikelissilins.com/track-open?email=${encodeURIComponent(email)}&recordId=${record._id}" width="1" height="1" style="display:none;">
-                    `,
+                    html: htmlContent.replace('{{email}}', email), // Replace email placeholder
                 };
-
+        
                 await transporter.sendMail(message);
                 sentEmails++;
-
+        
                 const emailStatus = new EmailStatus({
                     recordId: record._id,
-                    email
+                    email // Ensure email is not null
                 });
                 await emailStatus.save();
-
+        
             } catch (err) {
                 console.error(`Failed to send email to ${email}:`, err);
                 bouncedEmails++;
-
+        
                 await EmailStatus.findOneAndUpdate(
                     { email },
-                    { status: 'bounced', bouncedAt: new Date(), bounceType: 'hard' } // Example
+                    { status: 'bounced', bouncedAt: new Date(), bounceType: 'hard' }
                 );
             }
         }

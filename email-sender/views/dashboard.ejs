@@ -10,6 +10,23 @@
             <div class="content">
                 <section class="intro text-center">
                     <h1>Dashboard - <%= record.subject %></h1>
+                    <p>
+                        <%= record.sentAt.toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }) %>
+                        at <%= record.sentAt.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        }) %>
+                        GMT<%= (record.sentAt.getTimezoneOffset() > 0 ? "-" : "+") + 
+                            Math.abs(record.sentAt.getTimezoneOffset() / 60).toString().padStart(2, '0') + 
+                            ":00" %>
+                    </p>
+
                     <div class="box summary-card mt-20">
                         <h2>Email Summary</h2>
                         <p><strong>Total Emails:</strong> <%= record.totalEmails %></p>
@@ -37,14 +54,14 @@
                                 <tr>
                                     <th>Email</th>
                                     <th>Status</th>
-                                    <th>Bounced At</th>
+                                    <th>Checked</th>
                                     <th>Bounce Type</th>
                                     <th>Opens</th>
                                     <th>Clicks</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% emailStatus.forEach(function(status) { %>
+                                <% emailStatuses.forEach(function(status) { %>
                                     <tr>
                                         <td><%= status.email %></td>
                                         <td><%= status.status %></td>
