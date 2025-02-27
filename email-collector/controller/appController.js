@@ -80,52 +80,39 @@ const tnx_post = async (req, res) => {
     }
 
     try {
-        // Set a timeout for the database operation
-        const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Operation timed out')), 5000)
-        );
-
-        // Save to database with timeout
-        await Promise.race([
-            (async () => {
-                const user = new Email(req.body);
-                await user.save();
-            })(),
-            timeout
-        ]);
-
-        // Trigger email processing via API route
-        fetch('/api/process-email', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: req.body.email,
-                name: req.body.name
-            })
-        }).catch(console.error); // Non-blocking
-
-        // Redirect immediately
-        res.redirect('/tnx');
-
-    } catch (error) {
-        console.error('Error:', error);
-        
-        if (error.message === 'Operation timed out') {
-            return res.status(503).render('error', {
-                title: 'Error',
-                errors: [{ msg: 'Service temporarily unavailable. Please try again.' }]
-            });
-        }
-        
-        if (error.code === 11000) {
+        // Quick DB check for duplicate
+        const existingUser = await Email.findOne({ email: req.body.email });
+        if (existingUser) {
             return res.status(400).render('index', {
                 title: 'Treniņprogramma',
                 errors: [{ msg: 'Šis e-pasts jau ir reģistrēts' }]
             });
         }
-        
+
+        // Redirect immediately
+        res.redirect('/tnx');
+
+        // Process in background after response
+        try {
+            // Save to database
+            const user = new Email(req.body);
+            await user.save();
+
+            // Trigger email sending
+            fetch('/api/process-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: req.body.email,
+                    name: req.body.name
+                })
+            }).catch(console.error);
+        } catch (error) {
+            console.error('Background processing error:', error);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
         res.status(500).render('error', { title: 'Error' });
     }
 };
