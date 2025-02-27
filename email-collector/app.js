@@ -71,29 +71,26 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
-// Enable trust proxy
-app.set('trust proxy', true);
-
-// Rate limiting middleware
+// Single rate limiter configuration
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minūtes
-    max: 100, // Limits katrai IP adresei - 100 pieprasījumi
-    message: {
-        status: 429,
-        error: 'Pārāk daudz pieprasījumu no šīs IP adreses. Lūdzu, mēģiniet vēlāk.',
-    },
-    headers: true,
-});
-
-// Apply rate limiting
-app.use(limiter);
-
-// Rate limiter configuration
-const submitLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour window
+    windowMs: 60 * 60 * 1000, // 1 hour
     max: 5, // limit each IP to 5 submissions per window
-    message: 'Too many attempts, please try again later'
+    handler: (req, res) => {
+        res.status(429).render('error', { 
+            title: 'Pārāk daudz mēģinājumu', 
+            errors: ['Pārāk daudz mēģinājumu. Lūdzu mēģiniet vēlāk.']
+        });
+    },
+    keyGenerator: (req) => {
+        return req.connection.remoteAddress;
+    },
+    skipFailedRequests: false,
+    standardHeaders: true,
+    legacyHeaders: false
 });
+
+// Apply rate limiter only to submit route
+app.use('/submit', limiter);
 
 // Email validation function
 async function isEmailValid(email) {

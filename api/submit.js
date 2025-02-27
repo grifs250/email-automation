@@ -1,23 +1,5 @@
 import { connectToDatabase, closeDatabaseConnection } from '../utils/db';
-import rateLimit from 'express-rate-limit';
 import { sendEmail } from '../utils/email';
-
-// Configure the rate limiter
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  trustProxy: false,
-  keyGenerator: (req) => {
-    return req.headers['x-forwarded-for'] || 
-           req.headers['x-real-ip'] || 
-           req.connection.remoteAddress;
-  },
-  handler: (_, res) => {
-    return res.status(429).json({
-      error: 'Too many requests, please try again later.'
-    });
-  }
-});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -32,6 +14,15 @@ export default async function handler(req, res) {
     }
 
     const db = await connectToDatabase();
+    
+    // Check for existing email
+    const existingSubscriber = await db.collection('subscribers').findOne({ email });
+    if (existingSubscriber) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Email already registered'
+      });
+    }
     
     // Queue the task first
     const task = {
@@ -48,13 +39,13 @@ export default async function handler(req, res) {
     // Quick insert to tasks collection
     await db.collection('tasks').insertOne(task);
 
-    // Send JSON response instead of redirect
+    // Send immediate response to user
     res.status(202).json({ 
       success: true,
       message: 'Task queued successfully'
     });
 
-    // Process in background
+    // Process in background after response is sent
     try {
       await processTask(task, db);
     } catch (error) {
@@ -65,6 +56,14 @@ export default async function handler(req, res) {
     console.error('Submit error:', error.message);
     await closeDatabaseConnection().catch(console.error);
     
+    // Handle duplicate key errors specifically
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email already registered'
+      });
+    }
+    
     res.status(500).json({ 
       success: false,
       error: 'Failed to process request'
@@ -72,6 +71,7 @@ export default async function handler(req, res) {
   }
 }
 
+// Background processing function
 async function processTask(task, db) {
   try {
     // Save to subscribers collection
@@ -81,10 +81,10 @@ async function processTask(task, db) {
       createdAt: new Date()
     });
 
-    // Send email using your existing email service
+    // Send email
     await sendTrainingProgramEmail(task.email, task.name);
 
-    // Update task status
+    // Update task status on success
     await db.collection('tasks').updateOne(
       { _id: task._id },
       { 
@@ -98,7 +98,7 @@ async function processTask(task, db) {
     );
 
   } catch (error) {
-    // Handle failure
+    // Update task status on failure
     await db.collection('tasks').updateOne(
       { _id: task._id },
       { 

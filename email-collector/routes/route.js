@@ -1,26 +1,18 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const appController = require('../controller/appController.js');
-const rateLimit = require('express-rate-limit');
 const emailValidator = require('deep-email-validator');
 
 const router = express.Router();
 
-// Rate limiter configuration
-const submitLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour window
-    max: 5, // limit each IP to 5 submissions per window
-    message: 'Pārāk daudz mēģinājumu. Lūdzu mēģiniet vēlāk.'
-});
-
-// Routes
+// Routes (without rate limiter)
 router.get('/', appController.index_get);
 router.get('/tnx', appController.tnx_get);
 router.get('/terms', (req, res) => {
     res.render('terms', { title: 'Lietošanas noteikumi' });
 });
 
-router.post('/submit', submitLimiter, [
+router.post('/submit', [
     body('name')
         .trim()
         .isLength({ min: 2 }).withMessage('Vārdam ir jābūt vismaz 2 rakstzīmju garumā')
