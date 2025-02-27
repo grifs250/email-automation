@@ -1,6 +1,27 @@
 import { connectToDatabase, closeDatabaseConnection } from '../utils/db';
+import rateLimit from 'express-rate-limit';
+
+// Configure the rate limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  trustProxy: false,
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for'] || 
+           req.headers['x-real-ip'] || 
+           req.connection.remoteAddress;
+  },
+  handler: (_, res) => {
+    return res.status(429).json({
+      error: 'Too many requests, please try again later.'
+    });
+  }
+});
 
 export default async function handler(req, res) {
+  // Apply rate limiting
+  await new Promise((resolve) => limiter(req, res, resolve));
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

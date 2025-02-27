@@ -13,6 +13,10 @@
         {
           "key": "Connection",
           "value": "keep-alive"
+        },
+        {
+          "key": "X-Real-IP",
+          "value": "${http:x-real-ip}"
         }
       ]
     }
