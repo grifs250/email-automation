@@ -1,7 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const emailController = require('../controllers/emailController');
-// const trackingController = require('../controllers/trackingController');
+const trackingController = require('../controllers/trackingController');
 
 const router = express.Router();
 
@@ -9,8 +9,10 @@ const router = express.Router();
 router.get('/', emailController.renderEmailForm);
 router.get('/dashboard', emailController.renderDashboardList);
 router.get('/dashboard/:id', emailController.renderDashboardDetails);
-// router.get('/track-open', trackingController.trackOpen);
-// router.get('/track-click', trackingController.trackClick);
+
+// Add tracking routes
+router.get('/track-open', trackingController.trackOpen);
+router.get('/track-click', trackingController.trackClick);
 
 // POST Routes
 router.post('/send', [

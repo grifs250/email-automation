@@ -111,10 +111,10 @@ const renderDashboardDetails = async (req, res) => {
             return res.status(404).render('error', { title: 'Error', error: 'Record not found' });
         }
 
-        const emailStatuses = await EmailStatus.find({ recordId: req.params.id });
+        const emailStatus = await EmailStatus.find({ recordId: req.params.id });
 
         // Calculate the bounce count dynamically
-        const bouncedEmailsCount = emailStatuses.filter(status => status.status === 'bounced').length;
+        const bouncedEmailsCount = emailStatus.filter(status => status.status === 'bounced').length;
 
         // Update the record with the new bouncedEmails count
         record.bouncedEmails = bouncedEmailsCount;
@@ -123,7 +123,7 @@ const renderDashboardDetails = async (req, res) => {
         res.render('dashboard', {
             title: `Dashboard - ${record.subject}`,
             record,
-            emailStatuses,
+            emailStatus,
         });
     } catch (error) {
         console.error('Error fetching dashboard details:', error);
@@ -164,21 +164,24 @@ const sendEmails = async (req, res) => {
             emailList = emails.map(item => item.email);
         }
 
+
+
         // Create a new record for the email campaign
         const record = new Record({
             subject: req.body.subject,
             totalEmails: emailList.length
         });
+        console.log(record);
         await record.save();
-
         // Handle scheduled emails
-        if (req.body.scheduleTime) {
-            const scheduledEmail = new ScheduledEmail({
-                recordId: record._id,
-                scheduledTime: new Date(req.body.scheduleTime),
-            });
-            await scheduledEmail.save();
-        }
+        // Not for now
+        // if (req.body.scheduleTime) {
+        //     const scheduledEmail = new ScheduledEmail({
+        //         recordId: record._id,
+        //         scheduledTime: new Date(req.body.scheduleTime),
+        //     });
+        //     await scheduledEmail.save();
+        // }
 
         // Setup email transporter
         const EMAIL = process.env.EMAIL;
@@ -200,22 +203,16 @@ const sendEmails = async (req, res) => {
         // Include a tracking pixel for opens
         htmlContent += `<img src="https://yourdomain.com/track-open?recordId=${record._id}&email={{email}}" width="1" height="1" style="display:none;">`;
 
-
         let sentEmails = 0;
         let bouncedEmails = 0;
 
         for (const email of emailList) {
-            if (!email) {
-                console.error('Encountered a null or undefined email, skipping.');
-                continue; // Skip this iteration
-            }
-        
             try {
                 const message = {
                     from: EMAIL,
                     to: email,
                     subject: req.body.subject,
-                    html: htmlContent.replace('{{email}}', email), // Replace email placeholder
+                    html: htmlContent
                 };
         
                 await transporter.sendMail(message);

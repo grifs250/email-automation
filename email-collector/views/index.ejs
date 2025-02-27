@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="lv">
-<%- include('./partials/head.ejs') %>
+<head>
+    <%- include('./partials/head.ejs') %>
+</head>
 <body>
   <div class="container">
     <header class="header">
@@ -17,14 +19,28 @@
         <section class="subscribe">
           <hr class="line">
           <h2>Tava jaunā treniņprogramma - atslēga uz <span class="highlight">panākumiem</span>.</h2>
-          <form action="/tnx" method="POST">
-            <label for="name">Vārds:</label>
-            <input type="text" id="name" name="name" placeholder="Ievadi savu vārdu" value="<%= typeof oldInput !== 'undefined' ? oldInput.name : '' %>" required>
+          <form method="POST" action="/submit" class="form">
+            <!-- Honeypot field -->
+            <div style="display:none;">
+                <input type="text" 
+                       name="website" 
+                       autocomplete="off" 
+                       tabindex="-1">
+            </div>
             
-            <label for="email">E-pasta adrese:</label>
-            <input type="email" id="email" name="email" placeholder="Ievadi savu e-pastu" value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>" required>
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Tavs vārds" required>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Tavs e-pasts" required>
+            </div>
             
-            <button type="submit">Saņemt tagad</button>
+            <div class="form-group consent-group">
+                <input type="checkbox" id="consent" name="consent" required>
+                <label for="consent">Es piekrītu <a href="/terms" target="_blank">lietošanas noteikumiem un privātuma politikai</a></label>
+            </div>
+            
+            <button type="submit">Saņemt programmu</button>
 
             <% if (errors && errors.length > 0) { %>
                 <div class="errors">
@@ -37,7 +53,7 @@
             <div class="info-icon-container">
               <span class="info-icon"><i class="fas fa-info-circle"></i></span>
               <span id="tooltip" class="tooltip-text">
-                <p>Ievadi savu Vārdu, E-pastu, un es uzreiz Tev aizsūtīšu ē-pastā linku uz Treniņprogrammu.</p>
+                <p>Ievadi savu Vārdu, E-pastu, un es uzreiz Tev aizsūtīšu e-pastā linku uz treniņu programmu.</p>
                 <p>Tu tiksi iekļauts manā ēpastu sarakstā, kur, kad man atnāks iedvesma, atsūtīšu tev ko noderīgu.</p>
               </span>
             </div>
@@ -49,5 +65,12 @@
       <%- include('./partials/footer.ejs') %>
     </main>
   </div>
+  <style>
+  /* Additional protection against bots trying to show hidden fields */
+  .form input[name="website"] {
+      position: absolute !important;
+      left: -9999px !important;
+  }
+  </style>
 </body>
 </html>

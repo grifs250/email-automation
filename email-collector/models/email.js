@@ -4,18 +4,18 @@ const Schema = mongoose.Schema;
 const emailSchema = new Schema({
     name: {
         type: String,
-        required: [true, 'Name is required'],
+        required: [true, 'Vārds ir obligāts'],
         trim: true,
-        minlength: [2, 'Name must be at least 2 characters long'],
-        maxlength: [100, 'Name must be at most 100 characters long']
+        minlength: [2, 'Vārdam jābūt vismaz 2 rakstzīmes garam'],
+        maxlength: [100, 'Vārds nedrīkst būt garāks par 100 rakstzīmēm']
     },
     email: {
         type: String,
-        required: [true, 'Email is required'],
+        required: [true, 'E-pasts ir obligāts'],
         unique: true,
         trim: true,
         lowercase: true,
-        match: [/.+\@.+\..+/, 'Please enter a valid email address']
+        match: [/.+\@.+\..+/, 'Lūdzu, ievadiet derīgu e-pasta adresi']
     }
 }, { timestamps: true });
 

@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const appRoute = require('./routes/route.js');
+const emailValidator = require('deep-email-validator');
 require('dotenv').config();
 
 // Express app
@@ -34,17 +35,40 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "https://www.googletagmanager.com", "'unsafe-inline'", "'unsafe-eval'"], // Allow GTM and inline scripts
-            styleSrc: ["'self'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "'unsafe-inline'"], // Allow external styles and inline styles
-            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"], // Allow external fonts
-            imgSrc: ["'self'", "data:"], // Allow images from self and data URIs
-            connectSrc: ["'self'", "https://www.googletagmanager.com"], // Allow connections to GTM
-            frameSrc: ["'self'"], // Default for iframes
-            objectSrc: ["'none'"], // Block all object embeds
-            upgradeInsecureRequests: [], // Enforces HTTPS
-        },
+            scriptSrc: [
+                "'self'", 
+                "'unsafe-inline'",
+                "'unsafe-eval'",
+                "https://www.googletagmanager.com"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://fonts.googleapis.com",
+                "https://cdnjs.cloudflare.com",
+                "https://use.fontawesome.com",
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+                "https:",
+            ],
+            connectSrc: [
+                "'self'",
+                "https://www.googletagmanager.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "https://cdnjs.cloudflare.com",
+                "https://use.fontawesome.com",
+                "https://use.fontawesome.com/releases/v6.0.0/webfonts/"
+            ],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: []
+        }
     },
-    crossOriginEmbedderPolicy: false,
+    crossOriginEmbedderPolicy: false
 }));
 
 // Enable trust proxy
@@ -52,17 +76,34 @@ app.set('trust proxy', true);
 
 // Rate limiting middleware
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
+    windowMs: 15 * 60 * 1000, // 15 minūtes
+    max: 100, // Limits katrai IP adresei - 100 pieprasījumi
     message: {
         status: 429,
-        error: 'Too many requests from this IP, please try again later.',
+        error: 'Pārāk daudz pieprasījumu no šīs IP adreses. Lūdzu, mēģiniet vēlāk.',
     },
     headers: true,
 });
 
 // Apply rate limiting
 app.use(limiter);
+
+// Rate limiter configuration
+const submitLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour window
+    max: 5, // limit each IP to 5 submissions per window
+    message: 'Too many attempts, please try again later'
+});
+
+// Email validation function
+async function isEmailValid(email) {
+    const { valid, reason, validators } = await emailValidator.validate(email);
+    return {
+        valid,
+        reason,
+        validators
+    };
+}
 
 // Routes
 app.use(appRoute);
@@ -74,6 +115,15 @@ app.use((req, res) => {
 
 // Listen for requests
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}...`);
-});
+app.listen(port)
+    .on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.log(`Port ${port} is busy, trying ${port + 1}`);
+            app.listen(port + 1);
+        } else {
+            console.error('Server error:', err);
+        }
+    })
+    .on('listening', () => {
+        console.log(`Server is listening on port ${port}...`);
+    });

@@ -9,6 +9,9 @@ require('dotenv').config();
 const emailRoutes = require('./routes/emailRoutes');
 const listRoutes = require('./routes/lists');
 
+// Add error handling middleware import
+const errorHandler = require('./middleware/errorHandler');
+
 // Express app
 const app = express();
 
@@ -67,6 +70,9 @@ app.use('/lists', listRoutes);
 app.use((req, res) => {
     res.status(404).render('404', { title: '404 - Page Not Found' });
 });
+
+// Global error handling middleware
+app.use(errorHandler);
 
 // Start server
 const port = process.env.PORT || 3000;
