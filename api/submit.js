@@ -1,4 +1,4 @@
-import { connectToDatabase } from '../utils/db';
+import { connectToDatabase, closeDatabaseConnection } from '../utils/db';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   console.time('submit-operation');
   
   try {
-    // Validate input first before database connection
+    // Validate input first
     const { email, name } = req.body;
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
@@ -22,7 +22,6 @@ export default async function handler(req, res) {
       )
     ]);
 
-    // Prepare the document before the insert
     const document = {
       email,
       name: name || '',
@@ -30,23 +29,18 @@ export default async function handler(req, res) {
       status: 'pending'
     };
 
-    // Quick insert with shorter timeout
-    const result = await Promise.race([
-      db.collection('subscribers').insertOne(document),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('DB Insert timeout')), 3000)
-      )
-    ]);
+    // Quick insert
+    const result = await db.collection('subscribers').insertOne(document);
 
     console.timeEnd('submit-operation');
-    
-    // Send immediate response
-    res.status(200).json({ success: true, id: result.insertedId });
+    return res.status(200).json({ success: true, id: result.insertedId });
 
   } catch (error) {
     console.error('Submit error:', error.message);
     
-    // Send specific error messages
+    // Close connection on error
+    await closeDatabaseConnection().catch(console.error);
+    
     if (error.message.includes('timeout')) {
       return res.status(503).json({
         error: 'Service temporarily unavailable',

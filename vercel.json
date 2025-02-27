@@ -16,10 +16,5 @@
         }
       ]
     }
-  ],
-  "edge": {
-    "api/submit.edge.js": {
-      "memory": 128
-    }
-  }
+  ]
 } 
