@@ -69,6 +69,16 @@ const tnx_get = (req, res) => {
 };
 
 const tnx_post = async (req, res) => {
+    // Validate input first
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).render('index', {
+            title: 'Treniņprogramma',
+            errors: errors.array(),
+            oldInput: req.body
+        });
+    }
+
     try {
         // Set a timeout for the entire operation
         const timeout = new Promise((_, reject) => 
