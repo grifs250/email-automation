@@ -1,5 +1,6 @@
 import { connectToDatabase, closeDatabaseConnection } from '../utils/db';
 import rateLimit from 'express-rate-limit';
+import { sendEmail } from '../utils/email';
 
 // Configure the rate limiter
 const limiter = rateLimit({
@@ -19,15 +20,10 @@ const limiter = rateLimit({
 });
 
 export default async function handler(req, res) {
-  // Apply rate limiting
-  await new Promise((resolve) => limiter(req, res, resolve));
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  console.time('submit-operation');
-  
   try {
     // Validate input first
     const { email, name } = req.body;
@@ -44,16 +40,18 @@ export default async function handler(req, res) {
       createdAt: new Date(),
       status: 'pending',
       retries: 0,
-      nextRetry: new Date()
+      nextRetry: new Date(),
+      template: 'training_program',
+      processed: false
     };
 
     // Quick insert to tasks collection
     await db.collection('tasks').insertOne(task);
 
-    // Send immediate response
+    // Send JSON response instead of redirect
     res.status(202).json({ 
-      message: 'Task queued successfully',
-      status: 'pending'
+      success: true,
+      message: 'Task queued successfully'
     });
 
     // Process in background
@@ -63,37 +61,28 @@ export default async function handler(req, res) {
       console.error('Background task error:', error);
     }
 
-    console.timeEnd('submit-operation');
-    return res.status(200).json({ success: true, id: task._id });
-
   } catch (error) {
     console.error('Submit error:', error.message);
-    
-    // Close connection on error
     await closeDatabaseConnection().catch(console.error);
     
-    if (error.message.includes('timeout')) {
-      return res.status(503).json({
-        error: 'Service temporarily unavailable',
-        details: 'Please try again in a few moments'
-      });
-    }
-    
-    return res.status(500).json({ 
-      error: 'Failed to queue task', 
-      details: 'Internal server error'
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to process request'
     });
   }
 }
 
 async function processTask(task, db) {
   try {
-    // Your processing logic here
-    const result = await db.collection('subscribers').insertOne({
+    // Save to subscribers collection
+    const subscriber = await db.collection('subscribers').insertOne({
       email: task.email,
       name: task.name,
       createdAt: new Date()
     });
+
+    // Send email using your existing email service
+    await sendTrainingProgramEmail(task.email, task.name);
 
     // Update task status
     await db.collection('tasks').updateOne(
@@ -102,7 +91,8 @@ async function processTask(task, db) {
         $set: { 
           status: 'completed',
           completedAt: new Date(),
-          result: result.insertedId
+          subscriberId: subscriber.insertedId,
+          processed: true
         }
       }
     );
@@ -122,4 +112,18 @@ async function processTask(task, db) {
     );
     throw error;
   }
+}
+
+async function sendTrainingProgramEmail(email, name) {
+  const emailData = {
+    to: email,
+    subject: 'Tava treniņu programma',
+    template: 'training_program',
+    context: {
+      name: name || 'Sportist',
+      programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
+    }
+  };
+
+  await sendEmail(emailData);
 } 
