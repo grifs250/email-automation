@@ -4,23 +4,17 @@
     {
       "src": "app.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/app.js" }
+    {
+      "src": "/(.*)",
+      "dest": "/app.js"
+    }
   ],
   "functions": {
     "app.js": {
       "maxDuration": 10
-    },
-    "api/*.js": {
-      "maxDuration": 60,
-      "memory": 1024
     }
   }
 }

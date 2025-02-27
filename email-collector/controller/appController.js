@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
 const Email = require('../models/email');
-const { sendEmail } = require('../utils/email');  // Import the email function
+const { sendEmail } = require('../utils/email');
 require('dotenv').config();
 
 // Route Handlers
@@ -24,8 +24,8 @@ const tnx_post = (req, res) => {
     // Send to thank you page immediately
     res.redirect('/tnx');
 
-    // Background processing
-    setImmediate(async () => {
+    // Process in background
+    process.nextTick(async () => {
         try {
             // Save to database
             const user = new Email({
@@ -33,19 +33,23 @@ const tnx_post = (req, res) => {
                 name: req.body.name
             });
             await user.save();
+            console.log('✅ User saved to database:', user.email);
 
-            // Send email directly using the queue system
-            await sendEmail({
-                to: req.body.email,
+            // Queue email
+            sendEmail({
+                to: user.email,
                 subject: 'Treniņu programma',
                 template: 'mail',
                 context: { 
-                    name: req.body.name,
+                    name: user.name,
                     programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
                 }
+            }).catch(error => {
+                console.error('❌ Email queuing error:', error);
             });
+
         } catch (error) {
-            console.error('Background processing error:', error);
+            console.error('❌ Background processing error:', error);
         }
     });
 };
