@@ -1,63 +1,7 @@
-const nodemailer = require('nodemailer');
 const { validationResult } = require('express-validator');
 const Email = require('../models/email');
-const path = require('path');
-const ejs = require('ejs');
+const { sendEmail } = require('../utils/email');  // Import the email function
 require('dotenv').config();
-
-// Create transporter once with optimized settings
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL,
-        pass: process.env.APP_PASS,
-    },
-    pool: true,
-    maxConnections: 1,
-    rateDelta: 1000,
-    rateLimit: 3,
-    // Add timeout settings
-    connectionTimeout: 3000,
-    greetingTimeout: 3000,
-    socketTimeout: 3000
-});
-
-// Queue for processing emails
-const emailQueue = [];
-let isProcessing = false;
-
-async function processEmailQueue() {
-    if (isProcessing || emailQueue.length === 0) return;
-    
-    isProcessing = true;
-    
-    while (emailQueue.length > 0) {
-        const task = emailQueue.shift();
-        try {
-            const emailHTML = await ejs.renderFile(
-                path.join(__dirname, '../views/mail.ejs'),
-                task.context
-            );
-
-            await transporter.sendMail({
-                from: process.env.EMAIL,
-                to: task.email,
-                subject: 'Treniņu programma',
-                html: emailHTML,
-            });
-            
-            console.log(`Email sent to: ${task.email}`);
-            
-            // Add delay between emails
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-        } catch (error) {
-            console.error('Failed to send email:', error);
-        }
-    }
-    
-    isProcessing = false;
-}
 
 // Route Handlers
 const index_get = (req, res) => {
@@ -68,53 +12,42 @@ const tnx_get = (req, res) => {
     res.render('tnx', { title: 'Paldies' });
 };
 
-const tnx_post = async (req, res) => {
-    // Validate input first
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).render('index', {
+const tnx_post = (req, res) => {
+    // Basic validation only
+    if (!req.body.email || !req.body.name || !req.body.consent) {
+        return res.render('index', {
             title: 'Treniņprogramma',
-            errors: errors.array(),
-            oldInput: req.body
+            errors: [{ msg: 'Visi lauki ir obligāti' }]
         });
     }
 
-    try {
-        // Quick DB check for duplicate
-        const existingUser = await Email.findOne({ email: req.body.email });
-        if (existingUser) {
-            return res.status(400).render('index', {
-                title: 'Treniņprogramma',
-                errors: [{ msg: 'Šis e-pasts jau ir reģistrēts' }]
-            });
-        }
+    // Send to thank you page immediately
+    res.redirect('/tnx');
 
-        // Redirect immediately
-        res.redirect('/tnx');
-
-        // Process in background after response
+    // Background processing
+    setImmediate(async () => {
         try {
             // Save to database
-            const user = new Email(req.body);
+            const user = new Email({
+                email: req.body.email,
+                name: req.body.name
+            });
             await user.save();
 
-            // Trigger email sending
-            fetch('/api/process-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: req.body.email,
-                    name: req.body.name
-                })
-            }).catch(console.error);
+            // Send email directly using the queue system
+            await sendEmail({
+                to: req.body.email,
+                subject: 'Treniņu programma',
+                template: 'mail',
+                context: { 
+                    name: req.body.name,
+                    programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
+                }
+            });
         } catch (error) {
             console.error('Background processing error:', error);
         }
-
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).render('error', { title: 'Error' });
-    }
+    });
 };
 
 module.exports = {

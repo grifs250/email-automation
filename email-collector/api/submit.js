@@ -1,4 +1,3 @@
-import { connectToDatabase } from '../utils/db';
 import { sendEmail } from '../utils/email';
 
 export default async function handler(req, res) {
@@ -21,7 +20,7 @@ export default async function handler(req, res) {
 
         res.status(200).json({ success: true });
     } catch (error) {
-        console.error('Email processing error:', error);
-        res.status(500).json({ error: 'Failed to process email' });
+        console.error('Email sending error:', error);
+        res.status(500).json({ error: 'Failed to send email' });
     }
 } 
