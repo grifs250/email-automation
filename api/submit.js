@@ -8,41 +8,55 @@ export default async function handler(req, res) {
   console.time('submit-operation');
   
   try {
-    // Connect to database with timeout
-    const db = await Promise.race([
-      connectToDatabase(),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('DB Connection timeout')), 5000)
-      )
-    ]);
-
+    // Validate input first before database connection
     const { email, name } = req.body;
-
-    // Quick validation
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Insert with timeout
-    const result = await Promise.race([
-      db.collection('subscribers').insertOne({ 
-        email, 
-        name, 
-        createdAt: new Date() 
-      }),
+    // Connect to database with shorter timeout
+    const db = await Promise.race([
+      connectToDatabase(),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('DB Insert timeout')), 5000)
+        setTimeout(() => reject(new Error('DB Connection timeout')), 3000)
+      )
+    ]);
+
+    // Prepare the document before the insert
+    const document = {
+      email,
+      name: name || '',
+      createdAt: new Date(),
+      status: 'pending'
+    };
+
+    // Quick insert with shorter timeout
+    const result = await Promise.race([
+      db.collection('subscribers').insertOne(document),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('DB Insert timeout')), 3000)
       )
     ]);
 
     console.timeEnd('submit-operation');
-    return res.status(200).json({ success: true, id: result.insertedId });
+    
+    // Send immediate response
+    res.status(200).json({ success: true, id: result.insertedId });
 
   } catch (error) {
-    console.error('Submit error:', error);
+    console.error('Submit error:', error.message);
+    
+    // Send specific error messages
+    if (error.message.includes('timeout')) {
+      return res.status(503).json({
+        error: 'Service temporarily unavailable',
+        details: 'Please try again in a few moments'
+      });
+    }
+    
     return res.status(500).json({ 
       error: 'Submission failed', 
-      details: error.message 
+      details: 'Internal server error'
     });
   }
 } 
