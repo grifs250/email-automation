@@ -15,6 +15,9 @@
     { "src": "/(.*)", "dest": "/app.js" }
   ],
   "functions": {
+    "app.js": {
+      "maxDuration": 10
+    },
     "api/*.js": {
       "maxDuration": 60,
       "memory": 1024

@@ -5,17 +5,21 @@ const path = require('path');
 const ejs = require('ejs');
 require('dotenv').config();
 
-// Create transporter once
+// Create transporter once with optimized settings
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL,
         pass: process.env.APP_PASS,
     },
-    pool: true, // Use pooled connections
+    pool: true,
     maxConnections: 1,
     rateDelta: 1000,
-    rateLimit: 3
+    rateLimit: 3,
+    // Add timeout settings
+    connectionTimeout: 3000,
+    greetingTimeout: 3000,
+    socketTimeout: 3000
 });
 
 // Queue for processing emails
@@ -65,43 +69,55 @@ const tnx_get = (req, res) => {
 };
 
 const tnx_post = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).render('index', {
-            title: 'Treniņprogramma',
-            errors: errors.array(),
-            oldInput: req.body
-        });
-    }
-
     try {
-        // Save to database first
-        const user = new Email(req.body);
-        await user.save();
-        
-        // Queue the email task
-        emailQueue.push({
-            email: user.email,
-            context: { 
-                name: user.name,
-                programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
-            }
-        });
+        // Set a timeout for the entire operation
+        const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Operation timed out')), 8000)
+        );
 
-        // Start processing queue in background
-        setImmediate(processEmailQueue);
-        
-        // Redirect immediately
-        res.redirect('/tnx');
+        // Race between the actual operation and timeout
+        await Promise.race([
+            (async () => {
+                // Save to database first
+                const user = new Email(req.body);
+                await user.save();
+                
+                // Queue the email task
+                emailQueue.push({
+                    email: user.email,
+                    context: { 
+                        name: user.name,
+                        programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
+                    }
+                });
+
+                // Start queue processing in background
+                setImmediate(processEmailQueue);
+                
+                // Redirect immediately
+                res.redirect('/tnx');
+            })(),
+            timeout
+        ]);
 
     } catch (error) {
         console.error('Error:', error);
+        
+        // Handle different types of errors
+        if (error.message === 'Operation timed out') {
+            return res.status(503).render('error', {
+                title: 'Error',
+                errors: [{ msg: 'Service temporarily unavailable. Please try again.' }]
+            });
+        }
+        
         if (error.code === 11000) {
             return res.status(400).render('index', {
                 title: 'Treniņprogramma',
                 errors: [{ msg: 'Šis e-pasts jau ir reģistrēts' }]
             });
         }
+        
         res.status(500).render('error', { title: 'Error' });
     }
 };
