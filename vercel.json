@@ -6,6 +6,12 @@
     }
   },
   "regions": ["arn1"],
+  "crons": [
+    {
+      "path": "/api/worker",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

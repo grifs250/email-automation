@@ -35,26 +35,36 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Connect to database with shorter timeout
-    const db = await Promise.race([
-      connectToDatabase(),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('DB Connection timeout')), 3000)
-      )
-    ]);
-
-    const document = {
+    const db = await connectToDatabase();
+    
+    // Queue the task first
+    const task = {
       email,
       name: name || '',
       createdAt: new Date(),
-      status: 'pending'
+      status: 'pending',
+      retries: 0,
+      nextRetry: new Date()
     };
 
-    // Quick insert
-    const result = await db.collection('subscribers').insertOne(document);
+    // Quick insert to tasks collection
+    await db.collection('tasks').insertOne(task);
+
+    // Send immediate response
+    res.status(202).json({ 
+      message: 'Task queued successfully',
+      status: 'pending'
+    });
+
+    // Process in background
+    try {
+      await processTask(task, db);
+    } catch (error) {
+      console.error('Background task error:', error);
+    }
 
     console.timeEnd('submit-operation');
-    return res.status(200).json({ success: true, id: result.insertedId });
+    return res.status(200).json({ success: true, id: task._id });
 
   } catch (error) {
     console.error('Submit error:', error.message);
@@ -70,8 +80,46 @@ export default async function handler(req, res) {
     }
     
     return res.status(500).json({ 
-      error: 'Submission failed', 
+      error: 'Failed to queue task', 
       details: 'Internal server error'
     });
+  }
+}
+
+async function processTask(task, db) {
+  try {
+    // Your processing logic here
+    const result = await db.collection('subscribers').insertOne({
+      email: task.email,
+      name: task.name,
+      createdAt: new Date()
+    });
+
+    // Update task status
+    await db.collection('tasks').updateOne(
+      { _id: task._id },
+      { 
+        $set: { 
+          status: 'completed',
+          completedAt: new Date(),
+          result: result.insertedId
+        }
+      }
+    );
+
+  } catch (error) {
+    // Handle failure
+    await db.collection('tasks').updateOne(
+      { _id: task._id },
+      { 
+        $set: { 
+          status: 'failed',
+          error: error.message,
+          failedAt: new Date()
+        },
+        $inc: { retries: 1 }
+      }
+    );
+    throw error;
   }
 } 
