@@ -1,10 +1,18 @@
 const nodemailer = require('nodemailer');
 const { validationResult } = require('express-validator');
 const Email = require('../models/email');
-const fs = require('fs');
-const path = require('path'); // Added path for reading email template
+const path = require('path');
 const ejs = require('ejs');
 require('dotenv').config();
+
+// Create transporter once
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.APP_PASS,
+    },
+});
 
 // Route Handlers
 const index_get = (req, res) => {
@@ -26,54 +34,46 @@ const tnx_post = async (req, res) => {
     }
 
     try {
-        // Add consent validation
-        if (!req.body.consent) {
-            return res.status(400).render('index', {
-                title: 'Sākums',
-                errors: ['Lūdzu, piekrītiet lietošanas noteikumiem']
-            });
-        }
-
-        // Create and save user email data
+        // Save to database first
         const user = new Email(req.body);
         await user.save();
-        console.log(`${user.name}, ${user.email} saved to the DB`);
-
-        // Email configuration
-        const EMAIL = process.env.EMAIL;
-        const PASS = process.env.APP_PASS;
-
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: EMAIL,
-                pass: PASS,
-            },
-        });
-
-        // Render mail.ejs template
-        const emailHTML = await ejs.renderFile(
-            path.join(__dirname, '../views/mail.ejs'),
-            { 
-                name: user.name,
-                programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
-            }
-        );
-
-        const message = {
-            from: EMAIL,
-            to: user.email,
-            subject: 'Treniņu programma',
-            html: emailHTML,
-        };
-
-        // Send email
-        await transporter.sendMail(message);
-        console.log(`Message sent to: ${user.email}`);
-
+        
+        // Redirect immediately
         res.redirect('/tnx');
+
+        // Send email in background
+        try {
+            const emailHTML = await ejs.renderFile(
+                path.join(__dirname, '../views/mail.ejs'),
+                { 
+                    name: user.name,
+                    programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
+                }
+            );
+
+            const message = {
+                from: process.env.EMAIL,
+                to: user.email,
+                subject: 'Treniņu programma',
+                html: emailHTML,
+            };
+
+            await transporter.sendMail(message);
+            console.log(`Message sent to: ${user.email}`);
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            // Don't affect user experience if email fails
+        }
+
     } catch (error) {
         console.error('Error:', error);
+        // If it's a duplicate email error
+        if (error.code === 11000) {
+            return res.status(400).render('index', {
+                title: 'Treniņprogramma',
+                errors: [{ msg: 'Šis e-pasts jau ir reģistrēts' }]
+            });
+        }
         res.status(500).render('error', { title: 'Error' });
     }
 };
