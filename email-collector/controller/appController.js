@@ -12,7 +12,48 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL,
         pass: process.env.APP_PASS,
     },
+    pool: true, // Use pooled connections
+    maxConnections: 1,
+    rateDelta: 1000,
+    rateLimit: 3
 });
+
+// Queue for processing emails
+const emailQueue = [];
+let isProcessing = false;
+
+async function processEmailQueue() {
+    if (isProcessing || emailQueue.length === 0) return;
+    
+    isProcessing = true;
+    
+    while (emailQueue.length > 0) {
+        const task = emailQueue.shift();
+        try {
+            const emailHTML = await ejs.renderFile(
+                path.join(__dirname, '../views/mail.ejs'),
+                task.context
+            );
+
+            await transporter.sendMail({
+                from: process.env.EMAIL,
+                to: task.email,
+                subject: 'Treniņu programma',
+                html: emailHTML,
+            });
+            
+            console.log(`Email sent to: ${task.email}`);
+            
+            // Add delay between emails
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+        } catch (error) {
+            console.error('Failed to send email:', error);
+        }
+    }
+    
+    isProcessing = false;
+}
 
 // Route Handlers
 const index_get = (req, res) => {
@@ -38,36 +79,23 @@ const tnx_post = async (req, res) => {
         const user = new Email(req.body);
         await user.save();
         
+        // Queue the email task
+        emailQueue.push({
+            email: user.email,
+            context: { 
+                name: user.name,
+                programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
+            }
+        });
+
+        // Start processing queue in background
+        setImmediate(processEmailQueue);
+        
         // Redirect immediately
         res.redirect('/tnx');
 
-        // Send email in background
-        try {
-            const emailHTML = await ejs.renderFile(
-                path.join(__dirname, '../views/mail.ejs'),
-                { 
-                    name: user.name,
-                    programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
-                }
-            );
-
-            const message = {
-                from: process.env.EMAIL,
-                to: user.email,
-                subject: 'Treniņu programma',
-                html: emailHTML,
-            };
-
-            await transporter.sendMail(message);
-            console.log(`Message sent to: ${user.email}`);
-        } catch (emailError) {
-            console.error('Email sending error:', emailError);
-            // Don't affect user experience if email fails
-        }
-
     } catch (error) {
         console.error('Error:', error);
-        // If it's a duplicate email error
         if (error.code === 11000) {
             return res.status(400).render('index', {
                 title: 'Treniņprogramma',
