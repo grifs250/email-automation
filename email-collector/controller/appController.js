@@ -80,40 +80,38 @@ const tnx_post = async (req, res) => {
     }
 
     try {
-        // Set a timeout for the entire operation
+        // Set a timeout for the database operation
         const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Operation timed out')), 8000)
+            setTimeout(() => reject(new Error('Operation timed out')), 5000)
         );
 
-        // Race between the actual operation and timeout
+        // Save to database with timeout
         await Promise.race([
             (async () => {
-                // Save to database first
                 const user = new Email(req.body);
                 await user.save();
-                
-                // Queue the email task
-                emailQueue.push({
-                    email: user.email,
-                    context: { 
-                        name: user.name,
-                        programLink: "https://docs.google.com/spreadsheets/d/1oMrSgnYp54GaVxjGBW4_7Q3EmmVBs1GFg_k99bb8Y-E/edit?usp=sharing"
-                    }
-                });
-
-                // Start queue processing in background
-                setImmediate(processEmailQueue);
-                
-                // Redirect immediately
-                res.redirect('/tnx');
             })(),
             timeout
         ]);
 
+        // Trigger email processing via API route
+        fetch('/api/process-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: req.body.email,
+                name: req.body.name
+            })
+        }).catch(console.error); // Non-blocking
+
+        // Redirect immediately
+        res.redirect('/tnx');
+
     } catch (error) {
         console.error('Error:', error);
         
-        // Handle different types of errors
         if (error.message === 'Operation timed out') {
             return res.status(503).render('error', {
                 title: 'Error',
